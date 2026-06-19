@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>DataFlow — {title}</title>
+  <link rel='preconnect' href='https://fonts.googleapis.com'/>
+  <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin/>
+  <link href='https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400;1,8..60,500;1,8..60,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap' rel='stylesheet'/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #0D0D0D;
+      --ink-soft:   #3D3D3D;
+      --ink-faint:  #888880;
+      --bg:         #F6F6F6;
+      --surface:    #FFFFFF;
+      --rule:       #C8C5BD;
+      --rule-light: #E8E6E0;
+      --accent:     #0D0D0D;
+      --accent-2:   #0D0D0D;
+      --warn:       #0D0D0D;
+      --ok:         #0D0D0D;
+      --tag-bg:     #F0EFE9;
+      --tag-fg:     #0D0D0D;
+      --font-display: 'Source Serif 4', Georgia, serif;
+      --font-body:    'DM Sans', sans-serif;
+      --r: 0px;
+      --gap: 2rem;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    /* ── LAYOUT ── */
+    .page-wrap {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--ink);
+      color: #fff;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      border-right: 1px solid var(--ink);
+    }
+
+    .sidebar-logo {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      font-style: italic;
+      font-weight: 400;
+      color: #fff;
+      letter-spacing: 0;
+    }
+    .sidebar-logo span { color: rgba(255,255,255,0.55); font-style: normal; }
+
+    .sidebar-meta {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.7;
+      letter-spacing: 0.02em;
+    }
+
+    nav { flex: 1; }
+    nav ul { list-style: none; display: flex; flex-direction: column; gap: 0; }
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      padding: 9px 10px;
+      border-radius: 0;
+      transition: color 0.12s;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    nav a:hover, nav a.active { color: #fff; background: rgba(255,255,255,0.06); }
+    nav .nav-step {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.45);
+      border-radius: 0;
+      padding: 2px 6px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    nav .nav-step.done {
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8);
+      border-color: rgba(255,255,255,0.3);
+    }
+    nav .nav-step.wip {
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      border-color: rgba(255,255,255,0.3);
+      border-style: dashed;
+    }
+
+    .sidebar-footer {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      line-height: 1.7;
+    }
+
+    /* ── MAIN ── */
+    main {
+      padding: 56px 56px 80px;
+      background: var(--surface);
+      border-right: 1px solid var(--rule);
+      min-width: 0;
+      overflow-x: hidden;
+    }
+
+    /* ── COVER ── */
+    .cover {
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--ink);
+      margin-bottom: 40px;
+    }
+    .cover-eyebrow {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 16px;
+    }
+    .cover h1 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 64px;
+      font-weight: 400;
+      line-height: 0.97;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 20px;
+    }
+    .cover h1 em {
+      font-style: italic;
+      font-weight: 400;
+    }
+    .cover-desc {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 20px;
+      line-height: 1.55;
+      color: var(--ink);
+      max-width: 540px;
+      margin-bottom: 24px;
+      font-weight: 400;
+    }
+    .cover-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+    }
+    .meta-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: transparent;
+      border: 1px solid var(--ink);
+      border-radius: 0;
+      padding: 5px 14px;
+      margin-right: -1px;
+    }
+    .meta-pill .dot { display: none; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-track {
+      background: var(--surface);
+      border: 1px solid var(--ink);
+      border-radius: 0;
+      padding: 24px 28px;
+      margin-bottom: 48px;
+    }
+    .progress-track h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 20px;
+    }
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+    }
+    .step-pip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      padding: 0 6px;
+      position: relative;
+    }
+    .step-pip::after {
+      content: '';
+      position: absolute;
+      top: 13px;
+      right: -50%;
+      width: 100%;
+      height: 1px;
+      background: var(--rule);
+      z-index: 0;
+    }
+    .step-pip:last-child::after { display: none; }
+    .pip-circle {
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--surface);
+      position: relative;
+      z-index: 1;
+    }
+    .step-pip.done .pip-circle { background: var(--ink); color: #fff; }
+    .step-pip.wip  .pip-circle { background: var(--surface); color: var(--ink); border-style: dashed; }
+    .step-pip.todo .pip-circle { background: var(--surface); color: var(--ink); opacity: 0.35; }
+    .pip-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      opacity: 0.55;
+      line-height: 1.3;
+    }
+
+    /* ── SECTIONS ── */
+    section { margin-bottom: 64px; scroll-margin-top: 2rem; }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      margin-bottom: 28px;
+    }
+    .section-num {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .section-header h2 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 36px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .section-header p {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      opacity: 0.5;
+      margin-top: 4px;
+    }
+    /* rule under section header */
+    .section-header { border-bottom: 1px solid var(--ink); padding-bottom: 16px; }
+
+    /* ── AI BADGE ── */
+    .ai-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: var(--tag-bg);
+      border: 1px solid var(--rule);
+      border-radius: 0;
+      padding: 4px 12px;
+      margin-bottom: 20px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 0;
+      padding: 24px 28px;
+      margin-bottom: 16px;
+    }
+    /* accent card variants — translate colored borders to left-border black */
+    .card[style*="border-left: 3px solid var(--accent)"],
+    .card[style*="border-left: 3px solid var(--accent-2)"],
+    .card[style*="border-left: 3px solid var(--ok)"],
+    .card[style*="border-left: 3px solid var(--warn)"] {
+      border-left: 2px solid var(--ink) !important;
+      border-top: 1px solid var(--rule);
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    .card[style*="background: var(--tag-bg)"] {
+      background: var(--tag-bg) !important;
+    }
+    .card-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+    .card p, .card li {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--ink);
+    }
+    .card ul { padding-left: 0; margin-top: 8px; list-style: none; }
+    .card ul li {
+      padding: 4px 0;
+      border-bottom: 1px solid var(--rule-light);
+      padding-left: 16px;
+      position: relative;
+    }
+    .card ul li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      opacity: 0.35;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+    }
+    .card ul li:last-child { border-bottom: none; }
+
+    /* ── 2-COL GRID ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ── PROBLEM STATEMENT BLOCK ── */
+    .problem-statement-block {
+      border: 1px solid var(--ink);
+      padding: 32px 36px;
+      margin-top: 24px;
+      margin-bottom: 16px;
+    }
+    .ps-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 12px;
+    }
+    .ps-main {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 20px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin-bottom: 24px;
+      max-width: 620px;
+    }
+    .ps-divider { height: 1px; background: var(--rule); margin: 20px 0; }
+    .ps-bet-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 10px;
+    }
+    .ps-bet {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      font-style: italic;
+      line-height: 1.6;
+      color: var(--ink);
+      margin-bottom: 24px;
+      max-width: 580px;
+    }
+    .ps-hypothesis-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--rule);
+    }
+    .ps-hypothesis-item {
+      padding: 16px 20px;
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    .ps-hypothesis-item:nth-child(even) { border-right: none; }
+    .ps-hypothesis-item:nth-last-child(-n+2) { border-bottom: none; }
+    .ps-h-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 5px;
+    }
+    .ps-h-value {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+
+    /* ── PERSONA CARD ── */
+    .persona-card {
+      border: 1px solid var(--ink);
+      margin-bottom: 24px;
+    }
+    .persona-header {
+      background: var(--ink);
+      color: #fff;
+      padding: 28px 32px;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .persona-avatar {
+      width: 52px;
+      height: 52px;
+      border: 1px solid rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 18px;
+      font-style: italic;
+      font-weight: 400;
+      color: #fff;
+      flex-shrink: 0;
+      background: transparent;
+    }
+    .persona-name {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 3px;
+    }
+    .persona-role {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: rgba(255,255,255,0.5);
+    }
+    .persona-quote {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-style: italic;
+      font-size: 15px;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.72);
+      margin-top: 12px;
+      padding-left: 16px;
+      border-left: 1px solid rgba(255,255,255,0.3);
+    }
+    .persona-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--rule);
+    }
+    .persona-section {
+      padding: 20px 24px;
+      border-right: 1px solid var(--rule);
+    }
+    .persona-section:last-child { border-right: none; }
+    .persona-section:nth-child(n+3) { border-top: 1px solid var(--rule); }
+    .persona-section h4 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 10px;
+    }
+    .persona-section ul { list-style: none; padding: 0; }
+    .persona-section li {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--rule-light);
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+    }
+    .persona-section li:last-child { border-bottom: none; }
+    .li-bullet { color: var(--ink); opacity: 0.3; font-size: 10px; flex-shrink: 0; font-family: 'DM Sans', sans-serif; }
+
+    /* ── QUOTE / BLOCKQUOTE ── */
+    blockquote {
+      border-left: 2px solid var(--ink);
+      padding: 4px 0 4px 24px;
+      margin: 16px 0;
+      background: transparent;
+      border-radius: 0;
+    }
+    blockquote p, blockquote {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-style: italic;
+      font-size: 18px;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+
+    /* ── JTBD LIST ── */
+    .jtbd-list { display: flex; flex-direction: column; gap: 0; }
+    .jtbd-item {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-bottom: none;
+      border-radius: 0;
+      padding: 18px 24px;
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      gap: 16px;
+      align-items: start;
+    }
+    .jtbd-item:last-child { border-bottom: 1px solid var(--rule); }
+    .jtbd-n {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 20px;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--ink);
+      opacity: 0.3;
+    }
+    .jtbd-title {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .jtbd-desc {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+      margin-top: 4px;
+    }
+    .jtbd-tag {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--ink);
+      padding: 3px 8px;
+      border-radius: 0;
+      white-space: nowrap;
+      border: 1px solid var(--rule);
+    }
+
+    /* ── DATA TABLE ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: var(--surface);
+      border-radius: 0;
+      border: 1px solid var(--ink);
+    }
+    .data-table th {
+      background: var(--tag-bg);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.6;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--ink);
+    }
+    .data-table td {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.55;
+      padding: 13px 16px;
+      color: var(--ink-soft);
+      border-bottom: 1px solid var(--rule-light);
+      vertical-align: top;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: var(--tag-bg); }
+    .data-table td strong { color: var(--ink); font-weight: 600; }
+    .data-table a.src-ref { color: var(--ink); opacity: 0.5; font-family: 'DM Sans', sans-serif; font-size: 11px; }
+
+    /* ── STATUS BADGE ── */
+    .badge {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 0;
+      margin-left: 8px;
+    }
+    .badge-done  { background: var(--ink); color: #fff; }
+    .badge-wip   { background: transparent; color: var(--ink); border: 1px dashed var(--rule); }
+    .badge-todo  { background: var(--tag-bg); color: var(--ink); opacity: 0.55; }
+
+    /* ── SOURCES BLOCK ── */
+    .sources-block {
+      border: 1px solid var(--rule);
+      padding: 20px 24px;
+      margin-top: 24px;
+    }
+    .sources-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 12px;
+    }
+    .sources-list {
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sources-list li {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--ink-soft);
+    }
+    .sources-list a { color: var(--ink); }
+
+    /* ── COMP GRID ── */
+    .comp-grid { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
+    .comp-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-bottom: none;
+    }
+    .comp-card:last-child { border-bottom: 1px solid var(--rule); }
+    .comp-header {
+      background: var(--ink) !important;
+      color: #fff;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .comp-logo {
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .comp-name {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 18px;
+      font-weight: 400;
+      margin-bottom: 2px;
+    }
+    .comp-type {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: rgba(255,255,255,0.45);
+    }
+    .comp-body { padding: 20px 24px; }
+    .comp-section { margin-bottom: 16px; }
+    .comp-section-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 8px;
+    }
+    .comp-section p {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+    }
+    .comp-pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--rule);
+    }
+    .comp-col { padding: 16px 18px; border-right: 1px solid var(--rule); }
+    .comp-col:last-child { border-right: none; }
+    .comp-col-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .comp-col-title.pro { color: var(--ink); }
+    .comp-col-title.con { color: var(--ink); opacity: 0.55; }
+    .comp-col ul { list-style: none; padding: 0; }
+    .comp-col li {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 13px;
+      line-height: 1.55;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--rule-light);
+      color: var(--ink-soft);
+    }
+    .comp-col li:last-child { border-bottom: none; }
+
+    /* ── SUBSECTION TITLE ── */
+    .subsection-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin: 32px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--rule);
+    }
+    h3.subsection-title, h3[class="subsection-title"] { font-family: 'DM Sans', sans-serif; }
+
+    /* ── FLOW DIAGRAM ── */
+    .flow-wrap { overflow-x: auto; margin-bottom: 12px; }
+    .flow-track {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-width: max-content;
+      padding: 24px 0 16px;
+    }
+    .flow-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 88px;
+      flex-shrink: 0;
+      padding: 10px 8px;
+      border: 1px solid var(--rule);
+      background: var(--surface);
+    }
+    .flow-trigger { border-color: var(--ink); background: var(--tag-bg); }
+    .flow-screen  { border-color: var(--rule); background: var(--surface); }
+    .flow-action  { border-color: var(--rule); background: var(--surface); }
+    .flow-end     { border-color: var(--ink); background: var(--ink); }
+    .flow-end .flow-label { color: #fff; }
+    .flow-end .flow-sub { color: rgba(255,255,255,0.6); }
+    .flow-icon { font-size: 18px; margin-bottom: 4px; }
+    .flow-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--ink);
+    }
+    .flow-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      color: var(--ink);
+      opacity: 0.55;
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+    .flow-arrow {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--rule);
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    .flow-split { display: flex; flex-direction: column; gap: 8px; }
+    .flow-split-option { display: flex; align-items: center; gap: 0; }
+    .flow-split-tag {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border: 1px solid var(--rule);
+      margin-right: 6px;
+      white-space: nowrap;
+    }
+    .flow-split-tag.a { border-color: var(--ink); }
+    .flow-split-tag.b { opacity: 0.55; }
+    .flow-time-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      opacity: 0.45;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── FLOW LEGEND ── */
+    .flow-legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .flow-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink-soft);
+    }
+    .flow-legend-dot { width: 12px; height: 12px; border: 1px solid var(--rule); flex-shrink: 0; }
+
+    /* ── EDGE CASES ── */
+    .edge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 16px; }
+    .edge-card {
+      border: 1px solid var(--rule);
+      border-right: none;
+      border-bottom: none;
+      padding: 20px 22px;
+    }
+    .edge-card:nth-child(even) { border-right: 1px solid var(--rule); }
+    .edge-card:nth-last-child(-n+2) { border-bottom: 1px solid var(--rule); }
+    .edge-card:nth-last-child(1):nth-child(odd) { border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+    .edge-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+    .edge-icon { font-size: 18px; flex-shrink: 0; }
+    .edge-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .edge-desc {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-top: 2px;
+    }
+    .edge-body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+    }
+    .edge-flow { font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--ink); opacity: 0.45; margin-top: 2px; }
+    .edge-col { margin-bottom: 12px; }
+    .edge-col-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 5px;
+    }
+    .edge-col p {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--ink-soft);
+    }
+
+    /* ── IA SHELL DIAGRAM ── */
+    .ia-shell {
+      background: #F0EFE9;
+      border: 1px solid var(--ink);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .ia-shell-topbar {
+      background: var(--ink);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .ia-shell-logo {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 400;
+      font-style: italic;
+      font-size: 14px;
+      color: #fff;
+    }
+    .ia-shell-nav { display: flex; gap: 4px; flex: 1; }
+    .ia-nav-item {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      padding: 4px 10px;
+    }
+    .ia-nav-active { color: #fff; background: rgba(255,255,255,0.1); }
+    .ia-shell-user {
+      width: 26px;
+      height: 26px;
+      border: 1px solid rgba(255,255,255,0.35);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ia-shell-body {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      min-height: 200px;
+    }
+    .ia-shell-main {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-right: 2px dashed var(--rule);
+      text-align: center;
+    }
+    .ia-shell-main-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 6px;
+    }
+    .ia-shell-main-sub {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 13px;
+      color: var(--ink);
+      opacity: 0.4;
+      font-style: italic;
+    }
+    .ia-shell-panel {
+      background: var(--surface);
+      border-left: 1px solid var(--rule);
+      display: flex;
+      flex-direction: column;
+    }
+    .ia-shell-panel-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 10px 14px 8px;
+      color: var(--ink);
+      opacity: 0.45;
+      border-bottom: 1px solid var(--rule);
+    }
+    .ia-shell-panel-zone {
+      flex: 1;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--rule);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ia-shell-panel-zone:last-child { border-bottom: none; }
+    .ia-zone-tag {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border: 1px solid var(--rule);
+      white-space: nowrap;
+    }
+    .ia-zone-alerts .ia-zone-tag { border-color: var(--ink); background: var(--ink); color: #fff; }
+    .ia-zone-insights .ia-zone-tag { border-color: var(--rule); }
+    .ia-zone-assistant .ia-zone-tag { border-color: var(--rule); opacity: 0.6; }
+
+    /* ── IA ZONES ── */
+    .ia-zones { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
+    .ia-zone-card {
+      border: 1px solid var(--rule);
+      border-bottom: none;
+    }
+    .ia-zone-card:last-child { border-bottom: 1px solid var(--rule); }
+    .ia-zc-alerts { border-left: 2px solid var(--ink); }
+    .ia-zc-insights { border-left: 2px solid var(--rule); }
+    .ia-zc-asst { border-left: 2px solid var(--rule); border-left-style: dashed; }
+    .ia-zc-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--rule-light);
+      background: var(--tag-bg);
+    }
+    .ia-zc-num {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.4;
+    }
+    .ia-zc-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .ia-zc-tag {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      opacity: 0.55;
+      margin-left: auto;
+    }
+    .ia-zc-body { padding: 18px 20px; }
+    .ia-zc-desc {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+      margin-bottom: 14px;
+    }
+    .ia-zc-contents { margin-bottom: 14px; }
+    .ia-zc-contents-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 8px;
+    }
+    .ia-zc-item {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--ink-soft);
+      padding: 4px 0;
+      border-bottom: 1px solid var(--rule-light);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .ia-zc-item:last-child { border-bottom: none; }
+    .ia-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .ia-dot-red    { background: var(--ink); }
+    .ia-dot-amber  { background: var(--ink); opacity: 0.5; }
+    .ia-dot-green  { background: var(--ink); opacity: 0.7; }
+    .ia-dot-blue   { background: var(--ink); opacity: 0.4; }
+    .ia-dot-purple { background: var(--ink); opacity: 0.55; border-radius: 0; }
+    .ia-zc-rule {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--ink);
+      opacity: 0.6;
+      border-top: 1px solid var(--rule-light);
+      padding-top: 10px;
+    }
+    .ia-rule-label {
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 10px;
+      margin-right: 6px;
+    }
+
+    /* ── IA CARD ANATOMY ── */
+    .ia-card-anatomy { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+    .ia-anatomy-card { border: 1px solid var(--ink); }
+    .ia-anatomy-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--rule-light);
+      padding: 12px 16px;
+      gap: 12px;
+    }
+    .ia-anatomy-row:last-child { border-bottom: none; }
+    .ia-anatomy-header-row { background: var(--tag-bg); }
+    .ia-anatomy-actions-row { background: var(--surface); }
+    .ia-anatomy-field { display: flex; flex-direction: column; gap: 4px; }
+    .ia-field-wide { grid-column: span 4; }
+    .ia-field-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.4;
+    }
+    .ia-field-example {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .ia-field-red { color: var(--ink); font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; }
+    .ia-field-faint { opacity: 0.45; }
+    .ia-field-source {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      opacity: 0.55;
+    }
+    .ia-field-conf {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink);
+      padding: 2px 8px;
+      border: 1px solid var(--rule);
+    }
+    .ia-field-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ia-action-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border: 1px solid var(--ink);
+      cursor: default;
+    }
+    .ia-action-primary { background: var(--ink); color: #fff; }
+    .ia-action-secondary { background: transparent; color: var(--ink); }
+    .ia-action-ghost { background: transparent; color: var(--ink); border-color: var(--rule); opacity: 0.6; }
+    .ia-anatomy-legend {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      font-style: italic;
+      line-height: 1.6;
+      color: var(--ink-soft);
+    }
+
+    /* ── DESIGN SCREENS ── */
+    .screen-wrap {
+      margin-bottom: 24px;
+      border: 1px solid var(--ink);
+      overflow: hidden;
+    }
+    .mockup-frame { background: #F0EFE9; font-size: 13px; }
+
+    /* Topbar */
+    .mck-topbar {
+      background: var(--ink);
+      padding: 0 16px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .mck-logo {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 400;
+      font-style: italic;
+      font-size: 14px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .mck-nav { display: flex; gap: 2px; flex: 1; }
+    .mck-nav-item {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      padding: 4px 10px;
+    }
+    .mck-nav-active { background: rgba(255,255,255,0.1); color: #fff; font-weight: 500; }
+    .mck-topbar-right { display: flex; align-items: center; gap: 8px; }
+    .mck-search {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 4px 10px;
+      width: 130px;
+    }
+    .mck-avatar {
+      width: 24px;
+      height: 24px;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mck-notification { font-size: 14px; position: relative; color: rgba(255,255,255,0.45); }
+    .mck-notif-dot {
+      position: absolute; top: 0; right: 0;
+      width: 5px; height: 5px;
+      background: #fff; border-radius: 50%;
+    }
+
+    /* Body layout */
+    .mck-body { display: grid; grid-template-columns: 1fr 400px; min-height: 520px; }
+
+    /* Main CRM area */
+    .mck-main { background: var(--surface); padding: 16px; border-right: 1px solid var(--rule); overflow: hidden; }
+    .mck-main-dimmed { background: #F8F7F4; opacity: 0.7; }
+    .mck-main-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .mck-page-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 400;
+      font-size: 18px;
+      color: var(--ink);
+    }
+    .mck-page-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-top: 2px;
+    }
+    .mck-main-actions { display: flex; gap: 4px; }
+    .mck-btn-ghost {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      border: 1px solid var(--rule);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 4px 10px;
+      cursor: default;
+    }
+    .mck-btn-primary {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      padding: 4px 10px;
+      cursor: default;
+    }
+
+    /* Pipeline columns */
+    .mck-pipeline-stages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .mck-stage { background: #F4F3EE; padding: 6px; }
+    .mck-stage-dim { opacity: 0.4; }
+    .mck-stage-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding: 0 2px; }
+    .mck-stage-name {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.5;
+    }
+    .mck-stage-count {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      background: var(--rule);
+      color: var(--ink);
+      padding: 1px 5px;
+      opacity: 0.7;
+    }
+    .mck-deal-card {
+      background: var(--surface);
+      border: 1px solid var(--rule-light);
+      padding: 6px 8px;
+      margin-bottom: 4px;
+    }
+    .mck-deal-dim { opacity: 0.4; }
+    .mck-deal-focused { border-color: var(--ink); }
+    .mck-deal-name {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 1px;
+    }
+    .mck-deal-meta {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 3px;
+    }
+    .mck-deal-bar { height: 2px; background: var(--rule-light); margin-bottom: 2px; }
+    .mck-deal-bar-fill { height: 100%; background: var(--ink) !important; opacity: 0.7; }
+    .mck-deal-risk {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.04em;
+    }
+    .mck-deal-more {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      color: var(--ink);
+      opacity: 0.35;
+      text-align: center;
+      padding: 3px;
+    }
+
+    /* AI Panel */
+    .mck-panel {
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--rule);
+      overflow-y: auto;
+      max-height: 520px;
+    }
+    .mck-panel-expanded { background: var(--surface); }
+    .mck-panel-header {
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid var(--rule);
+      flex-shrink: 0;
+    }
+    .mck-panel-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .mck-panel-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 400;
+      font-size: 14px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mck-ai-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ink);
+      display: inline-block;
+    }
+    .mck-ai-dot-sm { width: 5px; height: 5px; }
+    .mck-panel-updated {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: var(--ink);
+      opacity: 0.35;
+    }
+    .mck-morning-banner {
+      background: var(--tag-bg);
+      border: 1px solid var(--rule);
+      padding: 8px 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .mck-morning-banner strong { font-weight: 700; }
+
+    /* Zones */
+    .mck-zone { padding: 10px 12px; border-bottom: 1px solid var(--rule-light); }
+    .mck-zone:last-child { border-bottom: none; }
+    .mck-zone-assistant-collapsed { padding: 8px 12px; }
+    .mck-zone-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.5;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+    .mck-zone-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .mck-zone-dot-red { background: var(--ink); }
+    .mck-zone-dot-green { background: var(--ink); opacity: 0.5; }
+    .mck-zone-count {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--ink);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+    }
+
+    /* Insight cards */
+    .mck-insight-card {
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border: 1px solid var(--rule);
+      background: var(--surface);
+    }
+    .mck-insight-card:last-child { margin-bottom: 0; }
+    .mck-card-high { border-left: 2px solid var(--ink); background: #FAFAF8; }
+    .mck-card-medium { border-left: 2px solid var(--rule); background: var(--surface); }
+    .mck-card-collapsed { background: var(--tag-bg); border-color: var(--rule-light); padding: 6px 10px; }
+    .mck-card-expanded { border-color: var(--ink); background: var(--surface); }
+    .mck-card-top { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+    .mck-card-severity {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      flex-shrink: 0;
+      letter-spacing: 0.04em;
+    }
+    .mck-sev-high { color: var(--ink); }
+    .mck-sev-medium { color: var(--ink); opacity: 0.6; }
+    .mck-card-entity {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink);
+      flex: 1;
+    }
+    .mck-card-value {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--ink);
+      flex-shrink: 0;
+    }
+    .mck-card-close { font-size: 10px; color: var(--ink); opacity: 0.35; cursor: default; margin-left: 4px; flex-shrink: 0; }
+    .mck-card-expand { font-size: 12px; color: var(--ink); opacity: 0.35; cursor: default; margin-left: auto; }
+    .mck-card-summary {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 12px;
+      color: var(--ink);
+      line-height: 1.5;
+      margin-bottom: 5px;
+    }
+    .mck-card-source {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 7px;
+    }
+    .mck-confidence {
+      font-family: 'DM Sans', sans-serif;
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      margin-left: 4px;
+      border: 1px solid var(--rule);
+      color: var(--ink);
+    }
+    .mck-conf-high { border-color: var(--ink); }
+    .mck-conf-med  { border-color: var(--rule); opacity: 0.7; }
+    .mck-card-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+    .mck-card-footer {
+      display: flex;
+      gap: 4px;
+      padding-top: 7px;
+      border-top: 1px solid var(--rule-light);
+      margin-top: 7px;
+    }
+
+    /* Action buttons */
+    .mck-act {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border: 1px solid var(--rule);
+      cursor: default;
+      white-space: nowrap;
+    }
+    .mck-act-primary   { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .mck-act-ai        { background: var(--tag-bg); color: var(--ink); border-color: var(--rule); }
+    .mck-act-secondary { background: var(--tag-bg); color: var(--ink); border-color: var(--rule); }
+    .mck-act-ghost     { background: transparent; color: var(--ink); border-color: var(--rule); opacity: 0.7; }
+    .mck-act-sm { font-size: 9px; padding: 3px 7px; flex-shrink: 0; }
+
+    /* Deal stats row */
+    .mck-deal-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 4px; margin-bottom: 7px; }
+    .mck-stat { background: var(--tag-bg); padding: 5px 6px; text-align: center; border: 1px solid var(--rule-light); }
+    .mck-stat-warn { background: #F8F7F4; border-color: var(--rule); }
+    .mck-stat-val {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .mck-stat-warn .mck-stat-val { color: var(--ink); }
+    .mck-stat-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 8px;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-top: 1px;
+      line-height: 1.2;
+    }
+
+    /* AI Assistant thread */
+    .mck-assistant-thread {
+      background: var(--tag-bg);
+      border: 1px solid var(--rule);
+      padding: 8px 10px;
+      margin-top: 8px;
+    }
+    .mck-thread-header {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.5;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+    .mck-msg {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      line-height: 1.5;
+      margin-bottom: 5px;
+      padding: 6px 9px;
+    }
+    .mck-msg-user {
+      background: var(--ink);
+      color: #fff;
+      text-align: right;
+      margin-left: 20px;
+    }
+    .mck-msg-ai {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      margin-right: 20px;
+    }
+    .mck-msg-source {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      color: var(--ink);
+      opacity: 0.4;
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px solid var(--rule-light);
+    }
+
+    /* Suggested actions */
+    .mck-suggested-actions { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+    .mck-suggested-act {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      background: var(--surface);
+      padding: 6px 8px;
+      border: 1px solid var(--rule-light);
+    }
+    .mck-sa-rank {
+      width: 16px;
+      height: 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      border: 1px solid var(--rule);
+    }
+    .mck-sa-1 .mck-sa-rank { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .mck-sa-2 .mck-sa-rank { background: transparent; color: var(--ink); }
+    .mck-sa-3 .mck-sa-rank { background: transparent; color: var(--ink); opacity: 0.5; }
+    .mck-sa-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .mck-sa-desc {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      color: var(--ink);
+      opacity: 0.55;
+      line-height: 1.4;
+      margin-top: 1px;
+    }
+
+    /* Thread input */
+    .mck-thread-input { display: flex; gap: 4px; margin-top: 6px; }
+    .mck-thread-field {
+      flex: 1;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      border: 1px solid var(--rule);
+      padding: 5px 8px;
+      background: var(--surface);
+      color: var(--ink);
+      opacity: 0.5;
+      outline: none;
+    }
+    .mck-thread-send {
+      width: 24px;
+      height: 24px;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      font-size: 11px;
+      cursor: default;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Trend cards */
+    .mck-trend-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 7px 8px;
+      background: var(--surface);
+      border: 1px solid var(--rule-light);
+      margin-bottom: 5px;
+    }
+    .mck-trend-icon {
+      width: 18px;
+      height: 18px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid var(--rule);
+      color: var(--ink);
+    }
+    .mck-trend-up { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .mck-trend-neutral { background: var(--tag-bg); }
+    .mck-trend-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .mck-trend-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-top: 1px;
+      line-height: 1.3;
+    }
+
+    /* Assistant collapsed */
+    .mck-assistant-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--tag-bg);
+      border: 1px solid var(--rule);
+      padding: 7px 10px;
+    }
+    .mck-assistant-icon { font-size: 12px; }
+    .mck-assistant-placeholder {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      opacity: 0.35;
+    }
+
+    /* ── ANNOTATIONS ── */
+    .annotation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      border: 1px solid var(--rule);
+    }
+    .annotation {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: var(--surface);
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      padding: 14px 16px;
+    }
+    .ann-num {
+      width: 20px;
+      height: 20px;
+      background: var(--ink);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .ann-text {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+    .ann-text strong { color: var(--ink); font-weight: 700; }
+
+    /* ── AI LOG ── */
+    .ai-log { display: flex; flex-direction: column; gap: 0; }
+    .log-entry {
+      border: 1px solid var(--rule);
+      border-bottom: none;
+    }
+    .log-entry:last-child { border-bottom: 1px solid var(--rule); }
+    .log-entry-pending { opacity: 0.55; }
+    .log-meta {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--rule-light);
+      background: var(--tag-bg);
+    }
+    .log-step {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+    }
+    .log-phase {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .log-tool {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border: 1px solid var(--rule);
+      color: var(--ink);
+    }
+    .tool-claude { border-color: var(--rule); }
+    .log-body { padding: 18px 22px 20px; }
+    .log-section { margin-bottom: 14px; }
+    .log-section:last-child { margin-bottom: 0; }
+    .log-section-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.4;
+      margin-bottom: 5px;
+    }
+    .log-section p {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--ink);
+    }
+    .log-verdict {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border: 1px solid var(--ink);
+      margin-top: 12px;
+    }
+    .log-verdict-accepted { background: var(--ink); color: #fff; }
+    .log-verdict-edited { background: transparent; color: var(--ink); }
+    .log-verdict-pending { border-color: var(--rule); color: var(--ink); opacity: 0.5; }
+
+    /* ── SRC REF ── */
+    .src-ref {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      opacity: 0.45;
+      text-decoration: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .page-wrap { grid-template-columns: 1fr; }
+      aside { display: none; }
+      main { padding: 32px 24px 56px; }
+      .cover h1 { font-size: 40px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <aside>
+    <div class="sidebar-logo">Data<span>Flow</span></div>
+    <div class="sidebar-meta">
+      Recruitment Task<br>
+      AI Smart Assistant<br>
+      &amp; Insight Panel<br><br>
+      Author: Justyna Koc<br>
+      Jun 2026
+    </div>
+    <nav>
+      <ul>
+        <li>
+          <a href="index.html" class="">
+            <span class="nav-step done">✓</span>00. Overview
+          </a>
+        </li>
+        <li>
+          <a href="p1-brief.html" class="">
+            <span class="nav-step done">✓</span>01. Brief &amp; Objectives
+          </a>
+        </li>
+        <li>
+          <a href="p2-research.html" class="">
+            <span class="nav-step done">✓</span>02. User &amp; Desk Research
+          </a>
+        </li>
+        <li>
+          <a href="p3-persona.html" class="">
+            <span class="nav-step done">✓</span>03. Persona &amp; JTBD
+          </a>
+        </li>
+        <li>
+          <a href="p4-competitive.html" class="">
+            <span class="nav-step done">✓</span>04. Competitive + Ideation
+          </a>
+        </li>
+        <li>
+          <a href="p5-flows.html" class="active">
+            <span class="nav-step done">✓</span>05. User Flows
+          </a>
+        </li>
+        <li>
+          <a href="p6-ia.html" class="">
+            <span class="nav-step done">✓</span>06. Information Architecture
+          </a>
+        </li>
+        <li>
+          <a href="p7-design.html" class="">
+            <span class="nav-step done">✓</span>07. Design Screens
+          </a>
+        </li>
+        <li>
+          <a href="p8-ai-log.html" class="">
+            <span class="nav-step wip">↻</span>08. AI Usage Log
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer">
+      Built with Claude<br>
+      Hosted on GitHub Pages
+    </div>
+  </aside>
+
+  <main>
+    <!-- ── SECTION 5: USER FLOWS ── -->
+    <section id="flows">
+      <div class="section-header">
+        <div>
+          <div class="section-num">Step 05 <span class="badge badge-done">Done</span></div>
+          <h2>User Flows</h2>
+          <p>Step-by-step paths through the two scenarios we're designing for</p>
+        </div>
+      </div>
+
+      <!-- SCOPE DECISION -->
+      <div class="card" style="border-left: 3px solid var(--accent); margin-bottom: 1.5rem;">
+        <div class="card-title">Scope decision — why these two flows</div>
+        <p>From the 5 JTBDs, we're designing <strong>J1 (Morning Triage)</strong> and <strong>J2 (Early Warning)</strong>, with J3 (Explainability) as an inline state rather than a separate screen. J4 and J5 are explicitly out of scope for this deliverable and flagged as the next design sprint. Two flows, three JTBDs, one coherent story — depth over breadth.</p>
+      </div>
+
+      <!-- LEGEND -->
+      <div class="flow-legend">
+        <div class="flow-legend-item"><div class="flow-legend-dot" style="background:#eff2ff; border:1.5px solid #2563eb;"></div> Trigger / entry</div>
+        <div class="flow-legend-item"><div class="flow-legend-dot" style="background:#faf5ff; border:1.5px solid #7c3aed;"></div> Screen state</div>
+        <div class="flow-legend-item"><div class="flow-legend-dot" style="background:#fff; border:1.5px solid #e3e6ed;"></div> User action</div>
+        <div class="flow-legend-item"><div class="flow-legend-dot" style="background:#f0fdf4; border:1.5px solid #16a34a;"></div> End / resolution</div>
+      </div>
+
+      <!-- FLOW 1 -->
+      <h3 class="subsection-title">Flow 1 — Morning Triage <span style="font-size:0.75rem; font-weight:500; color:var(--ink-faint); margin-left:0.5rem;">J1 + J3 · ~90 seconds</span></h3>
+
+      <div class="flow-wrap">
+        <!-- Main track -->
+        <div class="flow-track">
+          <div class="flow-node flow-trigger">
+            <div class="flow-icon">☀</div>
+            <div class="flow-label">Opens DataFlow<br>8am</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-screen">
+            <div class="flow-icon">🧠</div>
+            <div class="flow-label">Insight Panel loads<div class="flow-sub">"3 things need your attention"</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-action">
+            <div class="flow-icon">👁</div>
+            <div class="flow-label">Scans Priority<br>Alerts</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-action">
+            <div class="flow-icon">👆</div>
+            <div class="flow-label">Taps alert card<div class="flow-sub">"Prague — no activity 18 days"</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-screen">
+            <div class="flow-icon">📋</div>
+            <div class="flow-label">Card expands<div class="flow-sub">AI summary +<br>suggested action</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+
+          <!-- SPLIT: two options -->
+          <div class="flow-split">
+            <div class="flow-split-option">
+              <span class="flow-split-tag a">Path A</span>
+              <div class="flow-node flow-action">
+                <div class="flow-icon">✉</div>
+                <div class="flow-label">Taps "Follow up"<div class="flow-sub">AI drafts email</div></div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node flow-end">
+                <div class="flow-icon">✓</div>
+                <div class="flow-label">Reviews &amp; sends<div class="flow-sub">Action logged</div></div>
+              </div>
+            </div>
+            <div class="flow-split-option">
+              <span class="flow-split-tag b">Path B</span>
+              <div class="flow-node flow-action">
+                <div class="flow-icon">💬</div>
+                <div class="flow-label">Taps "Ask AI"<div class="flow-sub">"Why is this at risk?"</div></div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node flow-screen">
+                <div class="flow-icon">🤖</div>
+                <div class="flow-label">AI explains<div class="flow-sub">Deal age, competitor,<br>no multi-threading</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-action">
+            <div class="flow-icon">👁</div>
+            <div class="flow-label">Scans Trend<br>Insights</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-end">
+            <div class="flow-icon">🚪</div>
+            <div class="flow-label">Closes panel<div class="flow-sub">Talks to team</div></div>
+          </div>
+        </div>
+        <div class="flow-time-label">⏱ Total time in DataFlow: ~90 seconds</div>
+      </div>
+
+      <!-- FLOW 2 -->
+      <h3 class="subsection-title" style="margin-top:2.5rem;">Flow 2 — Early Warning <span style="font-size:0.75rem; font-weight:500; color:var(--ink-faint); margin-left:0.5rem;">J2 + J3 · Mid-day intervention</span></h3>
+
+      <div class="flow-wrap">
+        <div class="flow-track">
+          <div class="flow-node flow-trigger" style="border-color:#dc2626; background:#fef2f2;">
+            <div class="flow-icon">🔔</div>
+            <div class="flow-label">Push notification<div class="flow-sub">"⚠ Deal at risk:<br>competitor mentioned"</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-action">
+            <div class="flow-icon">👆</div>
+            <div class="flow-label">Taps<br>notification</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-screen">
+            <div class="flow-icon">⚡</div>
+            <div class="flow-label">Panel opens<div class="flow-sub">Jumps to that<br>deal card</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-screen">
+            <div class="flow-icon">📋</div>
+            <div class="flow-label">Warning card expanded<div class="flow-sub">€85k · 14 days to close<br>1 stakeholder engaged</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-action">
+            <div class="flow-icon">💬</div>
+            <div class="flow-label">Taps "Why is<br>this at risk?"</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-screen">
+            <div class="flow-icon">🤖</div>
+            <div class="flow-label">AI Assistant opens<div class="flow-sub">Competitor 2× on Oct 3<br>Decision maker silent 6d<br>Only 1 stakeholder</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-action">
+            <div class="flow-icon">⌨</div>
+            <div class="flow-label">Types: "What<br>should I do?"</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-screen">
+            <div class="flow-icon">💡</div>
+            <div class="flow-label">AI suggests 3 actions<div class="flow-sub">1. Contact CFO<br>2. Send ROI study<br>3. Escalate</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-action">
+            <div class="flow-icon">👆</div>
+            <div class="flow-label">Taps action 1<div class="flow-sub">"Contact CFO"</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-screen">
+            <div class="flow-icon">✉</div>
+            <div class="flow-label">AI drafts email<div class="flow-sub">to CFO</div></div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-action">
+            <div class="flow-icon">✏</div>
+            <div class="flow-label">Reviews<br>&amp; sends</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node flow-end">
+            <div class="flow-icon">🔍</div>
+            <div class="flow-label">Deal marked<div class="flow-sub">"Being monitored"<br>Panel returns</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREENS NEEDED -->
+      <h3 class="subsection-title" style="margin-top: 2rem;">Screens these flows require</h3>
+      <div class="grid-2">
+        <div class="card" style="border-top: 3px solid var(--accent);">
+          <div class="card-title">Screen 1 — Panel default / Morning Triage</div>
+          <p style="font-size:0.82rem; color:var(--ink-soft);">The Insight Panel in its loaded ambient state. Priority alerts at top, trend insights below, AI Assistant collapsed but accessible. Covers <strong>J1</strong>.</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent-2);">
+          <div class="card-title">Screen 2 — Expanded card + AI Assistant</div>
+          <p style="font-size:0.82rem; color:var(--ink-soft);">Single warning card expanded with AI explanation inline, suggested actions, assistant chat thread. Covers <strong>J2 + J3</strong> in one screen.</p>
+        </div>
+      </div>
+
+      <!-- EDGE CASES -->
+      <h3 class="subsection-title" style="margin-top: 2rem;">Edge Cases & Failure States (AI Interaction States)</h3>
+      <p style="font-size: 0.83rem; color: var(--ink-soft); margin-bottom: 1rem;">Happy-path flows don't survive contact with real users. These 6 designed AI interaction states directly address system transparency, user autonomy, and data integrity.</p>
+
+      <div class="edge-grid">
+
+        <div class="edge-card">
+          <div class="edge-header">
+            <span class="edge-icon">📈</span>
+            <div>
+              <div class="edge-title">1. The Confidence Score State</div>
+              <div class="edge-desc">Trust & Transparency</div>
+            </div>
+          </div>
+          <p class="edge-body">Every automated insight or anomaly flag features a micro-UI indicator showing an AI Confidence Score (e.g., [94% Confidence Rate]). Hovering reveals exact citations (e.g., "Based on 14 client emails and ERP log syncs") to build user trust.</p>
+        </div>
+
+        <div class="edge-card">
+          <div class="edge-header">
+            <span class="edge-icon">🤖</span>
+            <div>
+              <div class="edge-title">2. The Smart Empty State</div>
+              <div class="edge-desc">The "All Clear" Scenario</div>
+            </div>
+          </div>
+          <p class="edge-body">If the data is perfectly stable with no fires to put out, the system generates a proactive summary: "All clear! No critical risks detected. Here are 3 proactive upsell opportunities to explore today" followed by revenue-generating suggestions.</p>
+        </div>
+
+        <div class="edge-card">
+          <div class="edge-header">
+            <span class="edge-icon">✏️</span>
+            <div>
+              <div class="edge-title">3. The Graceful Recovery State</div>
+              <div class="edge-desc">Hallucination & Error Mitigation</div>
+            </div>
+          </div>
+          <p class="edge-body">To ensure compliance with the User Control and Freedom heuristic, every single insight card includes explicit closed-loop feedback components: Thumbs Up/Down and a prominent "Edit or Adjust AI Context" action button.</p>
+        </div>
+
+        <div class="edge-card">
+          <div class="edge-header">
+            <span class="edge-icon">⚠️</span>
+            <div>
+              <div class="edge-title">4. Human-Factor Warning State</div>
+              <div class="edge-desc">Bad Input Data Mitigation</div>
+            </div>
+          </div>
+          <p class="edge-body">Marcin’s insights depend heavily on sales reps logging activity. When data is missing, the UI separates external risks from internal blindspots: "Warning: Rep has not logged activity for 12 days. AI cannot verify deal health." with a [Ping Rep] macro-action.</p>
+        </div>
+
+        <div class="edge-card">
+          <div class="edge-header">
+            <span class="edge-icon">🎛️</span>
+            <div>
+              <div class="edge-title">5. Multi-Variant Query State</div>
+              <div class="edge-desc">Adjusting the AI Lens</div>
+            </div>
+          </div>
+          <p class="edge-body">Tied to Flow 02 (Root-Cause Query). The AI chat response drawer avoids walls of static text by including inline interactive "Quick Filter Chips" beneath responses (e.g., [Narrow to Enterprise Tier], [Compare with Region Y]).</p>
+        </div>
+
+        <div class="edge-card">
+          <div class="edge-header">
+            <span class="edge-icon">✉️</span>
+            <div>
+              <div class="edge-title">6. Contextual Hand-Off State</div>
+              <div class="edge-desc">From Insight to Immediate Action</div>
+            </div>
+          </div>
+          <p class="edge-body">Tied to Flow 01 (Morning Triage). An insight is useless if copy-pasted manually. The UI deeply integrates text insights with actions by providing localized context blocks like [Generate Re-engagement Email via Copilot] directly within the card.</p>
+        </div>
+
+      </div>
+
+      <div class="edge-grid">
+        <div class="edge-card">
+          <div class="edge-body">
+            <div class="edge-col">
+              <div class="edge-col-label">What happens</div>
+              <p>Deal was imported recently, no calls logged, no email history in system. AI has no signals to draw from.</p>
+            </div>
+            <div class="edge-col">
+              <div class="edge-col-label">Design response</div>
+              <p>Show a partial explanation with an explicit data gap notice: <em>"Based on limited data — last activity was 18 days ago, but no call records found. Consider logging a manual note."</em> Never show a blank state or generic error.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="edge-card">
+          <div class="edge-header">
+            <span class="edge-icon">❌</span>
+            <div>
+              <div class="edge-title">Marcin dismisses the AI suggestion</div>
+              <div class="edge-flow">Flow 2 — after AI suggests 3 actions</div>
+            </div>
+          </div>
+          <div class="edge-body">
+            <div class="edge-col">
+              <div class="edge-col-label">What happens</div>
+              <p>Marcin knows something the AI doesn't — maybe he spoke to the client yesterday offline. He wants to dismiss or override.</p>
+            </div>
+            <div class="edge-col">
+              <div class="edge-col-label">Design response</div>
+              <p>Always provide a "Dismiss" action with an optional 1-tap reason (e.g. "Already handled", "Not relevant"). Dismissed cards feed back into the AI model over time. This is also the trust-building mechanism — users who can override are users who stay.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="edge-card">
+          <div class="edge-header">
+            <span class="edge-icon">🌀</span>
+            <div>
+              <div class="edge-title">Panel loads with no insights — empty state</div>
+              <div class="edge-flow">Flow 1 — Insight Panel loads</div>
+            </div>
+          </div>
+          <div class="edge-body">
+            <div class="edge-col">
+              <div class="edge-col-label">What happens</div>
+              <p>New user, clean pipeline, or everything is on track — no alerts to surface. An empty panel looks like a broken feature.</p>
+            </div>
+            <div class="edge-col">
+              <div class="edge-col-label">Design response</div>
+              <p>Replace empty state with a positive signal: <em>"All deals on track. No action needed today."</em> + a summary of pipeline health. Silence should feel like good news, not a bug.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="edge-card">
+          <div class="edge-header">
+            <span class="edge-icon">📡</span>
+            <div>
+              <div class="edge-title">Insights are stale — data hasn't refreshed</div>
+              <div class="edge-flow">Flow 1 — Panel loads, but sync failed overnight</div>
+            </div>
+          </div>
+          <div class="edge-body">
+            <div class="edge-col">
+              <div class="edge-col-label">What happens</div>
+              <p>CRM sync failed or data is more than 4h old. Marcin acts on an insight that may already be outdated — damages trust if he discovers it later.</p>
+            </div>
+            <div class="edge-col">
+              <div class="edge-col-label">Design response</div>
+              <p>Every insight card shows a "last updated" timestamp. If data is stale (&gt;4h), show a subtle warning banner: <em>"Insights based on data from 6h ago — sync in progress."</em> Never silently surface outdated data.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      </div>
+
+    </section>
+  </main>
+
+</div>
+</body>
+</html>

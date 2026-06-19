@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>DataFlow — {title}</title>
+  <link rel='preconnect' href='https://fonts.googleapis.com'/>
+  <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin/>
+  <link href='https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400;1,8..60,500;1,8..60,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap' rel='stylesheet'/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #0D0D0D;
+      --ink-soft:   #3D3D3D;
+      --ink-faint:  #888880;
+      --bg:         #F6F6F6;
+      --surface:    #FFFFFF;
+      --rule:       #C8C5BD;
+      --rule-light: #E8E6E0;
+      --accent:     #0D0D0D;
+      --accent-2:   #0D0D0D;
+      --warn:       #0D0D0D;
+      --ok:         #0D0D0D;
+      --tag-bg:     #F0EFE9;
+      --tag-fg:     #0D0D0D;
+      --font-display: 'Source Serif 4', Georgia, serif;
+      --font-body:    'DM Sans', sans-serif;
+      --r: 0px;
+      --gap: 2rem;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    /* ── LAYOUT ── */
+    .page-wrap {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--ink);
+      color: #fff;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      border-right: 1px solid var(--ink);
+    }
+
+    .sidebar-logo {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      font-style: italic;
+      font-weight: 400;
+      color: #fff;
+      letter-spacing: 0;
+    }
+    .sidebar-logo span { color: rgba(255,255,255,0.55); font-style: normal; }
+
+    .sidebar-meta {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.7;
+      letter-spacing: 0.02em;
+    }
+
+    nav { flex: 1; }
+    nav ul { list-style: none; display: flex; flex-direction: column; gap: 0; }
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      padding: 9px 10px;
+      border-radius: 0;
+      transition: color 0.12s;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    nav a:hover, nav a.active { color: #fff; background: rgba(255,255,255,0.06); }
+    nav .nav-step {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.45);
+      border-radius: 0;
+      padding: 2px 6px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    nav .nav-step.done {
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8);
+      border-color: rgba(255,255,255,0.3);
+    }
+    nav .nav-step.wip {
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      border-color: rgba(255,255,255,0.3);
+      border-style: dashed;
+    }
+
+    .sidebar-footer {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      line-height: 1.7;
+    }
+
+    /* ── MAIN ── */
+    main {
+      padding: 56px 56px 80px;
+      background: var(--surface);
+      border-right: 1px solid var(--rule);
+      min-width: 0;
+      overflow-x: hidden;
+    }
+
+    /* ── COVER ── */
+    .cover {
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--ink);
+      margin-bottom: 40px;
+    }
+    .cover-eyebrow {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 16px;
+    }
+    .cover h1 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 64px;
+      font-weight: 400;
+      line-height: 0.97;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 20px;
+    }
+    .cover h1 em {
+      font-style: italic;
+      font-weight: 400;
+    }
+    .cover-desc {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 20px;
+      line-height: 1.55;
+      color: var(--ink);
+      max-width: 540px;
+      margin-bottom: 24px;
+      font-weight: 400;
+    }
+    .cover-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+    }
+    .meta-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: transparent;
+      border: 1px solid var(--ink);
+      border-radius: 0;
+      padding: 5px 14px;
+      margin-right: -1px;
+    }
+    .meta-pill .dot { display: none; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-track {
+      background: var(--surface);
+      border: 1px solid var(--ink);
+      border-radius: 0;
+      padding: 24px 28px;
+      margin-bottom: 48px;
+    }
+    .progress-track h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 20px;
+    }
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+    }
+    .step-pip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      padding: 0 6px;
+      position: relative;
+    }
+    .step-pip::after {
+      content: '';
+      position: absolute;
+      top: 13px;
+      right: -50%;
+      width: 100%;
+      height: 1px;
+      background: var(--rule);
+      z-index: 0;
+    }
+    .step-pip:last-child::after { display: none; }
+    .pip-circle {
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--surface);
+      position: relative;
+      z-index: 1;
+    }
+    .step-pip.done .pip-circle { background: var(--ink); color: #fff; }
+    .step-pip.wip  .pip-circle { background: var(--surface); color: var(--ink); border-style: dashed; }
+    .step-pip.todo .pip-circle { background: var(--surface); color: var(--ink); opacity: 0.35; }
+    .pip-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      opacity: 0.55;
+      line-height: 1.3;
+    }
+
+    /* ── SECTIONS ── */
+    section { margin-bottom: 64px; scroll-margin-top: 2rem; }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      margin-bottom: 28px;
+    }
+    .section-num {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .section-header h2 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 36px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .section-header p {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      opacity: 0.5;
+      margin-top: 4px;
+    }
+    /* rule under section header */
+    .section-header { border-bottom: 1px solid var(--ink); padding-bottom: 16px; }
+
+    /* ── AI BADGE ── */
+    .ai-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: var(--tag-bg);
+      border: 1px solid var(--rule);
+      border-radius: 0;
+      padding: 4px 12px;
+      margin-bottom: 20px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 0;
+      padding: 24px 28px;
+      margin-bottom: 16px;
+    }
+    /* accent card variants — translate colored borders to left-border black */
+    .card[style*="border-left: 3px solid var(--accent)"],
+    .card[style*="border-left: 3px solid var(--accent-2)"],
+    .card[style*="border-left: 3px solid var(--ok)"],
+    .card[style*="border-left: 3px solid var(--warn)"] {
+      border-left: 2px solid var(--ink) !important;
+      border-top: 1px solid var(--rule);
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    .card[style*="background: var(--tag-bg)"] {
+      background: var(--tag-bg) !important;
+    }
+    .card-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+    .card p, .card li {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--ink);
+    }
+    .card ul { padding-left: 0; margin-top: 8px; list-style: none; }
+    .card ul li {
+      padding: 4px 0;
+      border-bottom: 1px solid var(--rule-light);
+      padding-left: 16px;
+      position: relative;
+    }
+    .card ul li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      opacity: 0.35;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+    }
+    .card ul li:last-child { border-bottom: none; }
+
+    /* ── 2-COL GRID ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ── PROBLEM STATEMENT BLOCK ── */
+    .problem-statement-block {
+      border: 1px solid var(--ink);
+      padding: 32px 36px;
+      margin-top: 24px;
+      margin-bottom: 16px;
+    }
+    .ps-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 12px;
+    }
+    .ps-main {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 20px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin-bottom: 24px;
+      max-width: 620px;
+    }
+    .ps-divider { height: 1px; background: var(--rule); margin: 20px 0; }
+    .ps-bet-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 10px;
+    }
+    .ps-bet {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      font-style: italic;
+      line-height: 1.6;
+      color: var(--ink);
+      margin-bottom: 24px;
+      max-width: 580px;
+    }
+    .ps-hypothesis-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--rule);
+    }
+    .ps-hypothesis-item {
+      padding: 16px 20px;
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    .ps-hypothesis-item:nth-child(even) { border-right: none; }
+    .ps-hypothesis-item:nth-last-child(-n+2) { border-bottom: none; }
+    .ps-h-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 5px;
+    }
+    .ps-h-value {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+
+    /* ── PERSONA CARD ── */
+    .persona-card {
+      border: 1px solid var(--ink);
+      margin-bottom: 24px;
+    }
+    .persona-header {
+      background: var(--ink);
+      color: #fff;
+      padding: 28px 32px;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .persona-avatar {
+      width: 52px;
+      height: 52px;
+      border: 1px solid rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 18px;
+      font-style: italic;
+      font-weight: 400;
+      color: #fff;
+      flex-shrink: 0;
+      background: transparent;
+    }
+    .persona-name {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 3px;
+    }
+    .persona-role {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: rgba(255,255,255,0.5);
+    }
+    .persona-quote {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-style: italic;
+      font-size: 15px;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.72);
+      margin-top: 12px;
+      padding-left: 16px;
+      border-left: 1px solid rgba(255,255,255,0.3);
+    }
+    .persona-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--rule);
+    }
+    .persona-section {
+      padding: 20px 24px;
+      border-right: 1px solid var(--rule);
+    }
+    .persona-section:last-child { border-right: none; }
+    .persona-section:nth-child(n+3) { border-top: 1px solid var(--rule); }
+    .persona-section h4 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 10px;
+    }
+    .persona-section ul { list-style: none; padding: 0; }
+    .persona-section li {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--rule-light);
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+    }
+    .persona-section li:last-child { border-bottom: none; }
+    .li-bullet { color: var(--ink); opacity: 0.3; font-size: 10px; flex-shrink: 0; font-family: 'DM Sans', sans-serif; }
+
+    /* ── QUOTE / BLOCKQUOTE ── */
+    blockquote {
+      border-left: 2px solid var(--ink);
+      padding: 4px 0 4px 24px;
+      margin: 16px 0;
+      background: transparent;
+      border-radius: 0;
+    }
+    blockquote p, blockquote {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-style: italic;
+      font-size: 18px;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+
+    /* ── JTBD LIST ── */
+    .jtbd-list { display: flex; flex-direction: column; gap: 0; }
+    .jtbd-item {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-bottom: none;
+      border-radius: 0;
+      padding: 18px 24px;
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      gap: 16px;
+      align-items: start;
+    }
+    .jtbd-item:last-child { border-bottom: 1px solid var(--rule); }
+    .jtbd-n {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 20px;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--ink);
+      opacity: 0.3;
+    }
+    .jtbd-title {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .jtbd-desc {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+      margin-top: 4px;
+    }
+    .jtbd-tag {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--ink);
+      padding: 3px 8px;
+      border-radius: 0;
+      white-space: nowrap;
+      border: 1px solid var(--rule);
+    }
+
+    /* ── DATA TABLE ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: var(--surface);
+      border-radius: 0;
+      border: 1px solid var(--ink);
+    }
+    .data-table th {
+      background: var(--tag-bg);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.6;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--ink);
+    }
+    .data-table td {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.55;
+      padding: 13px 16px;
+      color: var(--ink-soft);
+      border-bottom: 1px solid var(--rule-light);
+      vertical-align: top;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: var(--tag-bg); }
+    .data-table td strong { color: var(--ink); font-weight: 600; }
+    .data-table a.src-ref { color: var(--ink); opacity: 0.5; font-family: 'DM Sans', sans-serif; font-size: 11px; }
+
+    /* ── STATUS BADGE ── */
+    .badge {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 0;
+      margin-left: 8px;
+    }
+    .badge-done  { background: var(--ink); color: #fff; }
+    .badge-wip   { background: transparent; color: var(--ink); border: 1px dashed var(--rule); }
+    .badge-todo  { background: var(--tag-bg); color: var(--ink); opacity: 0.55; }
+
+    /* ── SOURCES BLOCK ── */
+    .sources-block {
+      border: 1px solid var(--rule);
+      padding: 20px 24px;
+      margin-top: 24px;
+    }
+    .sources-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 12px;
+    }
+    .sources-list {
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sources-list li {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--ink-soft);
+    }
+    .sources-list a { color: var(--ink); }
+
+    /* ── COMP GRID ── */
+    .comp-grid { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
+    .comp-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-bottom: none;
+    }
+    .comp-card:last-child { border-bottom: 1px solid var(--rule); }
+    .comp-header {
+      background: var(--ink) !important;
+      color: #fff;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .comp-logo {
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .comp-name {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 18px;
+      font-weight: 400;
+      margin-bottom: 2px;
+    }
+    .comp-type {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: rgba(255,255,255,0.45);
+    }
+    .comp-body { padding: 20px 24px; }
+    .comp-section { margin-bottom: 16px; }
+    .comp-section-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 8px;
+    }
+    .comp-section p {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+    }
+    .comp-pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--rule);
+    }
+    .comp-col { padding: 16px 18px; border-right: 1px solid var(--rule); }
+    .comp-col:last-child { border-right: none; }
+    .comp-col-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .comp-col-title.pro { color: var(--ink); }
+    .comp-col-title.con { color: var(--ink); opacity: 0.55; }
+    .comp-col ul { list-style: none; padding: 0; }
+    .comp-col li {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 13px;
+      line-height: 1.55;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--rule-light);
+      color: var(--ink-soft);
+    }
+    .comp-col li:last-child { border-bottom: none; }
+
+    /* ── SUBSECTION TITLE ── */
+    .subsection-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin: 32px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--rule);
+    }
+    h3.subsection-title, h3[class="subsection-title"] { font-family: 'DM Sans', sans-serif; }
+
+    /* ── FLOW DIAGRAM ── */
+    .flow-wrap { overflow-x: auto; margin-bottom: 12px; }
+    .flow-track {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-width: max-content;
+      padding: 24px 0 16px;
+    }
+    .flow-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 88px;
+      flex-shrink: 0;
+      padding: 10px 8px;
+      border: 1px solid var(--rule);
+      background: var(--surface);
+    }
+    .flow-trigger { border-color: var(--ink); background: var(--tag-bg); }
+    .flow-screen  { border-color: var(--rule); background: var(--surface); }
+    .flow-action  { border-color: var(--rule); background: var(--surface); }
+    .flow-end     { border-color: var(--ink); background: var(--ink); }
+    .flow-end .flow-label { color: #fff; }
+    .flow-end .flow-sub { color: rgba(255,255,255,0.6); }
+    .flow-icon { font-size: 18px; margin-bottom: 4px; }
+    .flow-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--ink);
+    }
+    .flow-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      color: var(--ink);
+      opacity: 0.55;
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+    .flow-arrow {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--rule);
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    .flow-split { display: flex; flex-direction: column; gap: 8px; }
+    .flow-split-option { display: flex; align-items: center; gap: 0; }
+    .flow-split-tag {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border: 1px solid var(--rule);
+      margin-right: 6px;
+      white-space: nowrap;
+    }
+    .flow-split-tag.a { border-color: var(--ink); }
+    .flow-split-tag.b { opacity: 0.55; }
+    .flow-time-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      opacity: 0.45;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── FLOW LEGEND ── */
+    .flow-legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .flow-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink-soft);
+    }
+    .flow-legend-dot { width: 12px; height: 12px; border: 1px solid var(--rule); flex-shrink: 0; }
+
+    /* ── EDGE CASES ── */
+    .edge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 16px; }
+    .edge-card {
+      border: 1px solid var(--rule);
+      border-right: none;
+      border-bottom: none;
+      padding: 20px 22px;
+    }
+    .edge-card:nth-child(even) { border-right: 1px solid var(--rule); }
+    .edge-card:nth-last-child(-n+2) { border-bottom: 1px solid var(--rule); }
+    .edge-card:nth-last-child(1):nth-child(odd) { border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+    .edge-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+    .edge-icon { font-size: 18px; flex-shrink: 0; }
+    .edge-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .edge-desc {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-top: 2px;
+    }
+    .edge-body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+    }
+    .edge-flow { font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--ink); opacity: 0.45; margin-top: 2px; }
+    .edge-col { margin-bottom: 12px; }
+    .edge-col-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 5px;
+    }
+    .edge-col p {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--ink-soft);
+    }
+
+    /* ── IA SHELL DIAGRAM ── */
+    .ia-shell {
+      background: #F0EFE9;
+      border: 1px solid var(--ink);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .ia-shell-topbar {
+      background: var(--ink);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .ia-shell-logo {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 400;
+      font-style: italic;
+      font-size: 14px;
+      color: #fff;
+    }
+    .ia-shell-nav { display: flex; gap: 4px; flex: 1; }
+    .ia-nav-item {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      padding: 4px 10px;
+    }
+    .ia-nav-active { color: #fff; background: rgba(255,255,255,0.1); }
+    .ia-shell-user {
+      width: 26px;
+      height: 26px;
+      border: 1px solid rgba(255,255,255,0.35);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ia-shell-body {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      min-height: 200px;
+    }
+    .ia-shell-main {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-right: 2px dashed var(--rule);
+      text-align: center;
+    }
+    .ia-shell-main-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 6px;
+    }
+    .ia-shell-main-sub {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 13px;
+      color: var(--ink);
+      opacity: 0.4;
+      font-style: italic;
+    }
+    .ia-shell-panel {
+      background: var(--surface);
+      border-left: 1px solid var(--rule);
+      display: flex;
+      flex-direction: column;
+    }
+    .ia-shell-panel-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 10px 14px 8px;
+      color: var(--ink);
+      opacity: 0.45;
+      border-bottom: 1px solid var(--rule);
+    }
+    .ia-shell-panel-zone {
+      flex: 1;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--rule);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ia-shell-panel-zone:last-child { border-bottom: none; }
+    .ia-zone-tag {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border: 1px solid var(--rule);
+      white-space: nowrap;
+    }
+    .ia-zone-alerts .ia-zone-tag { border-color: var(--ink); background: var(--ink); color: #fff; }
+    .ia-zone-insights .ia-zone-tag { border-color: var(--rule); }
+    .ia-zone-assistant .ia-zone-tag { border-color: var(--rule); opacity: 0.6; }
+
+    /* ── IA ZONES ── */
+    .ia-zones { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
+    .ia-zone-card {
+      border: 1px solid var(--rule);
+      border-bottom: none;
+    }
+    .ia-zone-card:last-child { border-bottom: 1px solid var(--rule); }
+    .ia-zc-alerts { border-left: 2px solid var(--ink); }
+    .ia-zc-insights { border-left: 2px solid var(--rule); }
+    .ia-zc-asst { border-left: 2px solid var(--rule); border-left-style: dashed; }
+    .ia-zc-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--rule-light);
+      background: var(--tag-bg);
+    }
+    .ia-zc-num {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.4;
+    }
+    .ia-zc-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .ia-zc-tag {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      opacity: 0.55;
+      margin-left: auto;
+    }
+    .ia-zc-body { padding: 18px 20px; }
+    .ia-zc-desc {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+      margin-bottom: 14px;
+    }
+    .ia-zc-contents { margin-bottom: 14px; }
+    .ia-zc-contents-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 8px;
+    }
+    .ia-zc-item {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--ink-soft);
+      padding: 4px 0;
+      border-bottom: 1px solid var(--rule-light);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .ia-zc-item:last-child { border-bottom: none; }
+    .ia-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .ia-dot-red    { background: var(--ink); }
+    .ia-dot-amber  { background: var(--ink); opacity: 0.5; }
+    .ia-dot-green  { background: var(--ink); opacity: 0.7; }
+    .ia-dot-blue   { background: var(--ink); opacity: 0.4; }
+    .ia-dot-purple { background: var(--ink); opacity: 0.55; border-radius: 0; }
+    .ia-zc-rule {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--ink);
+      opacity: 0.6;
+      border-top: 1px solid var(--rule-light);
+      padding-top: 10px;
+    }
+    .ia-rule-label {
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 10px;
+      margin-right: 6px;
+    }
+
+    /* ── IA CARD ANATOMY ── */
+    .ia-card-anatomy { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+    .ia-anatomy-card { border: 1px solid var(--ink); }
+    .ia-anatomy-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--rule-light);
+      padding: 12px 16px;
+      gap: 12px;
+    }
+    .ia-anatomy-row:last-child { border-bottom: none; }
+    .ia-anatomy-header-row { background: var(--tag-bg); }
+    .ia-anatomy-actions-row { background: var(--surface); }
+    .ia-anatomy-field { display: flex; flex-direction: column; gap: 4px; }
+    .ia-field-wide { grid-column: span 4; }
+    .ia-field-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.4;
+    }
+    .ia-field-example {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .ia-field-red { color: var(--ink); font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; }
+    .ia-field-faint { opacity: 0.45; }
+    .ia-field-source {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      opacity: 0.55;
+    }
+    .ia-field-conf {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink);
+      padding: 2px 8px;
+      border: 1px solid var(--rule);
+    }
+    .ia-field-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ia-action-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border: 1px solid var(--ink);
+      cursor: default;
+    }
+    .ia-action-primary { background: var(--ink); color: #fff; }
+    .ia-action-secondary { background: transparent; color: var(--ink); }
+    .ia-action-ghost { background: transparent; color: var(--ink); border-color: var(--rule); opacity: 0.6; }
+    .ia-anatomy-legend {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 14px;
+      font-style: italic;
+      line-height: 1.6;
+      color: var(--ink-soft);
+    }
+
+    /* ── DESIGN SCREENS ── */
+    .screen-wrap {
+      margin-bottom: 24px;
+      border: 1px solid var(--ink);
+      overflow: hidden;
+    }
+    .mockup-frame { background: #F0EFE9; font-size: 13px; }
+
+    /* Topbar */
+    .mck-topbar {
+      background: var(--ink);
+      padding: 0 16px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .mck-logo {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 400;
+      font-style: italic;
+      font-size: 14px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .mck-nav { display: flex; gap: 2px; flex: 1; }
+    .mck-nav-item {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      padding: 4px 10px;
+    }
+    .mck-nav-active { background: rgba(255,255,255,0.1); color: #fff; font-weight: 500; }
+    .mck-topbar-right { display: flex; align-items: center; gap: 8px; }
+    .mck-search {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 4px 10px;
+      width: 130px;
+    }
+    .mck-avatar {
+      width: 24px;
+      height: 24px;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mck-notification { font-size: 14px; position: relative; color: rgba(255,255,255,0.45); }
+    .mck-notif-dot {
+      position: absolute; top: 0; right: 0;
+      width: 5px; height: 5px;
+      background: #fff; border-radius: 50%;
+    }
+
+    /* Body layout */
+    .mck-body { display: grid; grid-template-columns: 1fr 400px; min-height: 520px; }
+
+    /* Main CRM area */
+    .mck-main { background: var(--surface); padding: 16px; border-right: 1px solid var(--rule); overflow: hidden; }
+    .mck-main-dimmed { background: #F8F7F4; opacity: 0.7; }
+    .mck-main-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .mck-page-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 400;
+      font-size: 18px;
+      color: var(--ink);
+    }
+    .mck-page-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-top: 2px;
+    }
+    .mck-main-actions { display: flex; gap: 4px; }
+    .mck-btn-ghost {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      border: 1px solid var(--rule);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 4px 10px;
+      cursor: default;
+    }
+    .mck-btn-primary {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      padding: 4px 10px;
+      cursor: default;
+    }
+
+    /* Pipeline columns */
+    .mck-pipeline-stages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .mck-stage { background: #F4F3EE; padding: 6px; }
+    .mck-stage-dim { opacity: 0.4; }
+    .mck-stage-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding: 0 2px; }
+    .mck-stage-name {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.5;
+    }
+    .mck-stage-count {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      background: var(--rule);
+      color: var(--ink);
+      padding: 1px 5px;
+      opacity: 0.7;
+    }
+    .mck-deal-card {
+      background: var(--surface);
+      border: 1px solid var(--rule-light);
+      padding: 6px 8px;
+      margin-bottom: 4px;
+    }
+    .mck-deal-dim { opacity: 0.4; }
+    .mck-deal-focused { border-color: var(--ink); }
+    .mck-deal-name {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 1px;
+    }
+    .mck-deal-meta {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 3px;
+    }
+    .mck-deal-bar { height: 2px; background: var(--rule-light); margin-bottom: 2px; }
+    .mck-deal-bar-fill { height: 100%; background: var(--ink) !important; opacity: 0.7; }
+    .mck-deal-risk {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.04em;
+    }
+    .mck-deal-more {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      color: var(--ink);
+      opacity: 0.35;
+      text-align: center;
+      padding: 3px;
+    }
+
+    /* AI Panel */
+    .mck-panel {
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--rule);
+      overflow-y: auto;
+      max-height: 520px;
+    }
+    .mck-panel-expanded { background: var(--surface); }
+    .mck-panel-header {
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid var(--rule);
+      flex-shrink: 0;
+    }
+    .mck-panel-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .mck-panel-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 400;
+      font-size: 14px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mck-ai-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ink);
+      display: inline-block;
+    }
+    .mck-ai-dot-sm { width: 5px; height: 5px; }
+    .mck-panel-updated {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: var(--ink);
+      opacity: 0.35;
+    }
+    .mck-morning-banner {
+      background: var(--tag-bg);
+      border: 1px solid var(--rule);
+      padding: 8px 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .mck-morning-banner strong { font-weight: 700; }
+
+    /* Zones */
+    .mck-zone { padding: 10px 12px; border-bottom: 1px solid var(--rule-light); }
+    .mck-zone:last-child { border-bottom: none; }
+    .mck-zone-assistant-collapsed { padding: 8px 12px; }
+    .mck-zone-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.5;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+    .mck-zone-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .mck-zone-dot-red { background: var(--ink); }
+    .mck-zone-dot-green { background: var(--ink); opacity: 0.5; }
+    .mck-zone-count {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--ink);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+    }
+
+    /* Insight cards */
+    .mck-insight-card {
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border: 1px solid var(--rule);
+      background: var(--surface);
+    }
+    .mck-insight-card:last-child { margin-bottom: 0; }
+    .mck-card-high { border-left: 2px solid var(--ink); background: #FAFAF8; }
+    .mck-card-medium { border-left: 2px solid var(--rule); background: var(--surface); }
+    .mck-card-collapsed { background: var(--tag-bg); border-color: var(--rule-light); padding: 6px 10px; }
+    .mck-card-expanded { border-color: var(--ink); background: var(--surface); }
+    .mck-card-top { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+    .mck-card-severity {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      flex-shrink: 0;
+      letter-spacing: 0.04em;
+    }
+    .mck-sev-high { color: var(--ink); }
+    .mck-sev-medium { color: var(--ink); opacity: 0.6; }
+    .mck-card-entity {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink);
+      flex: 1;
+    }
+    .mck-card-value {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--ink);
+      flex-shrink: 0;
+    }
+    .mck-card-close { font-size: 10px; color: var(--ink); opacity: 0.35; cursor: default; margin-left: 4px; flex-shrink: 0; }
+    .mck-card-expand { font-size: 12px; color: var(--ink); opacity: 0.35; cursor: default; margin-left: auto; }
+    .mck-card-summary {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 12px;
+      color: var(--ink);
+      line-height: 1.5;
+      margin-bottom: 5px;
+    }
+    .mck-card-source {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-bottom: 7px;
+    }
+    .mck-confidence {
+      font-family: 'DM Sans', sans-serif;
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      margin-left: 4px;
+      border: 1px solid var(--rule);
+      color: var(--ink);
+    }
+    .mck-conf-high { border-color: var(--ink); }
+    .mck-conf-med  { border-color: var(--rule); opacity: 0.7; }
+    .mck-card-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+    .mck-card-footer {
+      display: flex;
+      gap: 4px;
+      padding-top: 7px;
+      border-top: 1px solid var(--rule-light);
+      margin-top: 7px;
+    }
+
+    /* Action buttons */
+    .mck-act {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border: 1px solid var(--rule);
+      cursor: default;
+      white-space: nowrap;
+    }
+    .mck-act-primary   { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .mck-act-ai        { background: var(--tag-bg); color: var(--ink); border-color: var(--rule); }
+    .mck-act-secondary { background: var(--tag-bg); color: var(--ink); border-color: var(--rule); }
+    .mck-act-ghost     { background: transparent; color: var(--ink); border-color: var(--rule); opacity: 0.7; }
+    .mck-act-sm { font-size: 9px; padding: 3px 7px; flex-shrink: 0; }
+
+    /* Deal stats row */
+    .mck-deal-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 4px; margin-bottom: 7px; }
+    .mck-stat { background: var(--tag-bg); padding: 5px 6px; text-align: center; border: 1px solid var(--rule-light); }
+    .mck-stat-warn { background: #F8F7F4; border-color: var(--rule); }
+    .mck-stat-val {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .mck-stat-warn .mck-stat-val { color: var(--ink); }
+    .mck-stat-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 8px;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-top: 1px;
+      line-height: 1.2;
+    }
+
+    /* AI Assistant thread */
+    .mck-assistant-thread {
+      background: var(--tag-bg);
+      border: 1px solid var(--rule);
+      padding: 8px 10px;
+      margin-top: 8px;
+    }
+    .mck-thread-header {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.5;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+    .mck-msg {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      line-height: 1.5;
+      margin-bottom: 5px;
+      padding: 6px 9px;
+    }
+    .mck-msg-user {
+      background: var(--ink);
+      color: #fff;
+      text-align: right;
+      margin-left: 20px;
+    }
+    .mck-msg-ai {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      margin-right: 20px;
+    }
+    .mck-msg-source {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      color: var(--ink);
+      opacity: 0.4;
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px solid var(--rule-light);
+    }
+
+    /* Suggested actions */
+    .mck-suggested-actions { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+    .mck-suggested-act {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      background: var(--surface);
+      padding: 6px 8px;
+      border: 1px solid var(--rule-light);
+    }
+    .mck-sa-rank {
+      width: 16px;
+      height: 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      border: 1px solid var(--rule);
+    }
+    .mck-sa-1 .mck-sa-rank { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .mck-sa-2 .mck-sa-rank { background: transparent; color: var(--ink); }
+    .mck-sa-3 .mck-sa-rank { background: transparent; color: var(--ink); opacity: 0.5; }
+    .mck-sa-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .mck-sa-desc {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      color: var(--ink);
+      opacity: 0.55;
+      line-height: 1.4;
+      margin-top: 1px;
+    }
+
+    /* Thread input */
+    .mck-thread-input { display: flex; gap: 4px; margin-top: 6px; }
+    .mck-thread-field {
+      flex: 1;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      border: 1px solid var(--rule);
+      padding: 5px 8px;
+      background: var(--surface);
+      color: var(--ink);
+      opacity: 0.5;
+      outline: none;
+    }
+    .mck-thread-send {
+      width: 24px;
+      height: 24px;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      font-size: 11px;
+      cursor: default;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Trend cards */
+    .mck-trend-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 7px 8px;
+      background: var(--surface);
+      border: 1px solid var(--rule-light);
+      margin-bottom: 5px;
+    }
+    .mck-trend-icon {
+      width: 18px;
+      height: 18px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid var(--rule);
+      color: var(--ink);
+    }
+    .mck-trend-up { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .mck-trend-neutral { background: var(--tag-bg); }
+    .mck-trend-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .mck-trend-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: var(--ink);
+      opacity: 0.45;
+      margin-top: 1px;
+      line-height: 1.3;
+    }
+
+    /* Assistant collapsed */
+    .mck-assistant-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--tag-bg);
+      border: 1px solid var(--rule);
+      padding: 7px 10px;
+    }
+    .mck-assistant-icon { font-size: 12px; }
+    .mck-assistant-placeholder {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      opacity: 0.35;
+    }
+
+    /* ── ANNOTATIONS ── */
+    .annotation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      border: 1px solid var(--rule);
+    }
+    .annotation {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: var(--surface);
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      padding: 14px 16px;
+    }
+    .ann-num {
+      width: 20px;
+      height: 20px;
+      background: var(--ink);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .ann-text {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+    .ann-text strong { color: var(--ink); font-weight: 700; }
+
+    /* ── AI LOG ── */
+    .ai-log { display: flex; flex-direction: column; gap: 0; }
+    .log-entry {
+      border: 1px solid var(--rule);
+      border-bottom: none;
+    }
+    .log-entry:last-child { border-bottom: 1px solid var(--rule); }
+    .log-entry-pending { opacity: 0.55; }
+    .log-meta {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--rule-light);
+      background: var(--tag-bg);
+    }
+    .log-step {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.45;
+    }
+    .log-phase {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .log-tool {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border: 1px solid var(--rule);
+      color: var(--ink);
+    }
+    .tool-claude { border-color: var(--rule); }
+    .log-body { padding: 18px 22px 20px; }
+    .log-section { margin-bottom: 14px; }
+    .log-section:last-child { margin-bottom: 0; }
+    .log-section-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: 0.4;
+      margin-bottom: 5px;
+    }
+    .log-section p {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--ink);
+    }
+    .log-verdict {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border: 1px solid var(--ink);
+      margin-top: 12px;
+    }
+    .log-verdict-accepted { background: var(--ink); color: #fff; }
+    .log-verdict-edited { background: transparent; color: var(--ink); }
+    .log-verdict-pending { border-color: var(--rule); color: var(--ink); opacity: 0.5; }
+
+    /* ── SRC REF ── */
+    .src-ref {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      color: var(--ink);
+      opacity: 0.45;
+      text-decoration: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .page-wrap { grid-template-columns: 1fr; }
+      aside { display: none; }
+      main { padding: 32px 24px 56px; }
+      .cover h1 { font-size: 40px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <aside>
+    <div class="sidebar-logo">Data<span>Flow</span></div>
+    <div class="sidebar-meta">
+      Recruitment Task<br>
+      AI Smart Assistant<br>
+      &amp; Insight Panel<br><br>
+      Author: Justyna Koc<br>
+      Jun 2026
+    </div>
+    <nav>
+      <ul>
+        <li>
+          <a href="index.html" class="">
+            <span class="nav-step done">✓</span>00. Overview
+          </a>
+        </li>
+        <li>
+          <a href="p1-brief.html" class="">
+            <span class="nav-step done">✓</span>01. Brief &amp; Objectives
+          </a>
+        </li>
+        <li>
+          <a href="p2-research.html" class="">
+            <span class="nav-step done">✓</span>02. User &amp; Desk Research
+          </a>
+        </li>
+        <li>
+          <a href="p3-persona.html" class="">
+            <span class="nav-step done">✓</span>03. Persona &amp; JTBD
+          </a>
+        </li>
+        <li>
+          <a href="p4-competitive.html" class="active">
+            <span class="nav-step done">✓</span>04. Competitive + Ideation
+          </a>
+        </li>
+        <li>
+          <a href="p5-flows.html" class="">
+            <span class="nav-step done">✓</span>05. User Flows
+          </a>
+        </li>
+        <li>
+          <a href="p6-ia.html" class="">
+            <span class="nav-step done">✓</span>06. Information Architecture
+          </a>
+        </li>
+        <li>
+          <a href="p7-design.html" class="">
+            <span class="nav-step done">✓</span>07. Design Screens
+          </a>
+        </li>
+        <li>
+          <a href="p8-ai-log.html" class="">
+            <span class="nav-step wip">↻</span>08. AI Usage Log
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer">
+      Built with Claude<br>
+      Hosted on GitHub Pages
+    </div>
+  </aside>
+
+  <main>
+    <!-- ── SECTION 4: COMPETITIVE ANALYSIS ── -->
+    <section id="competitive">
+      <div class="section-header">
+        <div>
+          <div class="section-num">Step 04 <span class="badge badge-done">Done</span></div>
+          <h2>Competitive Analysis</h2>
+          <p>What similar AI-powered CRM features exist, what works, what doesn't, and what DataFlow can learn</p>
+        </div>
+      </div>
+
+      <div class="ai-note">⚡ AI-assisted — Claude researched 3 major competitors via web search, cross-referencing G2, Capterra, TrustRadius, and independent reviews</div>
+
+      <!-- COMPETITOR CARDS -->
+      <div class="comp-grid">
+
+        <!-- Salesforce Einstein -->
+        <div class="comp-card">
+          <div class="comp-header" style="background: linear-gradient(135deg, #00a1e0, #0070d2);">
+            <div class="comp-logo">SF</div>
+            <div>
+              <div class="comp-name">Salesforce Einstein / Agentforce</div>
+              <div class="comp-type">CRM-native AI · Enterprise</div>
+            </div>
+          </div>
+          <div class="comp-body">
+            <div class="comp-section">
+              <div class="comp-section-title">What it does</div>
+              <p>AI layer embedded across the entire Salesforce platform. Covers lead scoring, opportunity summaries, deal risk flags, forecast assistance, email drafting, and conversational queries via Einstein Copilot. In 2025 evolved into Agentforce — autonomous agents that act on insights without being prompted. <sup><a href="#csrc-1" class="src-ref">[C1]</a></sup></p>
+            </div>
+            <div class="comp-pros-cons">
+              <div class="comp-col">
+                <div class="comp-col-title pro">✓ What works</div>
+                <ul>
+                  <li>Deeply native — AI has access to full CRM data history <sup><a href="#csrc-1" class="src-ref">[C1]</a></sup></li>
+                  <li>Opportunity summaries save time in forecast calls — "instead of clicking through three tabs, you get a paragraph" <sup><a href="#csrc-2" class="src-ref">[C2]</a></sup></li>
+                  <li>Lead scoring is genuinely predictive with clean historical data — surfaces patterns humans miss <sup><a href="#csrc-2" class="src-ref">[C2]</a></sup></li>
+                  <li>Einstein Copilot saved teams avg. 12 hrs/employee/week on CRM admin <sup><a href="#csrc-3" class="src-ref">[C3]</a></sup></li>
+                  <li>Einstein Trust Layer addresses enterprise data privacy concerns <sup><a href="#csrc-1" class="src-ref">[C1]</a></sup></li>
+                </ul>
+              </div>
+              <div class="comp-col">
+                <div class="comp-col-title con">✗ What doesn't</div>
+                <ul>
+                  <li>Best features locked behind very expensive plans ($150+/seat/month) <sup><a href="#csrc-2" class="src-ref">[C2]</a></sup></li>
+                  <li>Requires 500+ closed deals before lead scoring is meaningful — noise before that <sup><a href="#csrc-2" class="src-ref">[C2]</a></sup></li>
+                  <li>Steep learning curve — "complex… not familiar with AI concepts" is the #1 user complaint <sup><a href="#csrc-4" class="src-ref">[C4]</a></sup></li>
+                  <li>Deep Salesforce lock-in — if your stack lives elsewhere, it's rigid <sup><a href="#csrc-1" class="src-ref">[C1]</a></sup></li>
+                  <li>2–3 month implementation typical; heavy reliance on dedicated admins <sup><a href="#csrc-4" class="src-ref">[C4]</a></sup></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HubSpot Breeze -->
+        <div class="comp-card">
+          <div class="comp-header" style="background: linear-gradient(135deg, #ff7a59, #e05a3a);">
+            <div class="comp-logo">HS</div>
+            <div>
+              <div class="comp-name">HubSpot Breeze AI / Copilot</div>
+              <div class="comp-type">CRM-native AI · SMB to Mid-Market</div>
+            </div>
+          </div>
+          <div class="comp-body">
+            <div class="comp-section">
+              <div class="comp-section-title">What it does</div>
+              <p>Breeze Copilot acts as an AI assistant for daily tasks: drafting emails, summarising contact records, flagging at-risk deals, and prepping for calls. Breeze Agents handle autonomous tasks. Predictive lead scoring for mid-market use cases. <sup><a href="#csrc-5" class="src-ref">[C5]</a></sup></p>
+            </div>
+            <div class="comp-pros-cons">
+              <div class="comp-col">
+                <div class="comp-col-title pro">✓ What works</div>
+                <ul>
+                  <li>"I no longer have to switch between multiple tools" — unified view praised by G2 reviewers <sup><a href="#csrc-6" class="src-ref">[C6]</a></sup></li>
+                  <li>Pipeline analysis and risk flagging are strong within the HubSpot ecosystem <sup><a href="#csrc-5" class="src-ref">[C5]</a></sup></li>
+                  <li>Intuitive UI — mirrors HubSpot's overall ease of use; low retraining required <sup><a href="#csrc-6" class="src-ref">[C6]</a></sup></li>
+                  <li>CRM-native deal analysis, forecast modelling, real-time risk flagging all in one place <sup><a href="#csrc-5" class="src-ref">[C5]</a></sup></li>
+                </ul>
+              </div>
+              <div class="comp-col">
+                <div class="comp-col-title con">✗ What doesn't</div>
+                <ul>
+                  <li>Autonomous AI agents only on Professional ($100+/seat) — gated behind paywalls <sup><a href="#csrc-6" class="src-ref">[C6]</a></sup></li>
+                  <li>AI doesn't extend to tools outside HubSpot — siloed to the platform <sup><a href="#csrc-5" class="src-ref">[C5]</a></sup></li>
+                  <li>G2 4.4/5 but Trustpilot 2.0/5 — strong on features, poor on support and billing <sup><a href="#csrc-7" class="src-ref">[C7]</a></sup></li>
+                  <li>Too many features — "overwhelming until you get used to it"; 10+ tabs before finding what you need <sup><a href="#csrc-7" class="src-ref">[C7]</a></sup></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gong -->
+        <div class="comp-card">
+          <div class="comp-header" style="background: linear-gradient(135deg, #6c3fc5, #4b2a8c);">
+            <div class="comp-logo">GO</div>
+            <div>
+              <div class="comp-name">Gong Revenue Intelligence</div>
+              <div class="comp-type">Conversation Intelligence · Enterprise</div>
+            </div>
+          </div>
+          <div class="comp-body">
+            <div class="comp-section">
+              <div class="comp-section-title">What it does</div>
+              <p>Captures and analyses every sales call, email, and meeting. Surfaces deal health scores, flags at-risk opportunities, and provides AI-backed forecasting using 300+ buying signals. Designed as a "source of truth" for sales leaders. <sup><a href="#csrc-8" class="src-ref">[C8]</a></sup></p>
+            </div>
+            <div class="comp-pros-cons">
+              <div class="comp-col">
+                <div class="comp-col-title pro">✓ What works</div>
+                <ul>
+                  <li>Deal boards flag risk proactively — "rep marks deal likely, Gong flags it high-risk if buyer went silent 2 weeks" <sup><a href="#csrc-8" class="src-ref">[C8]</a></sup></li>
+                  <li>Engagement Map shows stakeholder involvement at a glance — powerful visual <sup><a href="#csrc-8" class="src-ref">[C8]</a></sup></li>
+                  <li>Teams using AI via Gong generate 77% more revenue per rep than those that don't <sup><a href="#csrc-9" class="src-ref">[C9]</a></sup></li>
+                  <li>Forces more honest pipeline reviews by surfacing objective signals vs. rep gut feel <sup><a href="#csrc-8" class="src-ref">[C8]</a></sup></li>
+                </ul>
+              </div>
+              <div class="comp-col">
+                <div class="comp-col-title con">✗ What doesn't</div>
+                <ul>
+                  <li>20–30 min delay for insights after calls — not real-time <sup><a href="#csrc-10" class="src-ref">[C10]</a></sup></li>
+                  <li>"Too complicated, not intuitive at all. Pipeline management portion almost impossible." — G2 verified <sup><a href="#csrc-10" class="src-ref">[C10]</a></sup></li>
+                  <li>Enterprise pricing — $1,200–$2,000/user/year; six-figure annual contracts common <sup><a href="#csrc-11" class="src-ref">[C11]</a></sup></li>
+                  <li>Requires clean CRM data — "garbage in, garbage out" — and dedicated RevOps to maintain value <sup><a href="#csrc-8" class="src-ref">[C8]</a></sup></li>
+                  <li>60–70% adoption after 3–6 months; unused features erode ROI <sup><a href="#csrc-10" class="src-ref">[C10]</a></sup></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /comp-grid -->
+
+      <!-- SYNTHESIS TABLE -->
+      <h3 class="subsection-title">What We Can Borrow — and What We Should Fix</h3>
+      <table class="data-table" style="margin-bottom: 1rem;">
+        <thead>
+          <tr><th>Pattern</th><th>Who does it</th><th>Borrow or Fix?</th><th>DataFlow design decision</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Deal risk flagging based on inactivity / silence</td>
+            <td>Gong, Einstein</td>
+            <td><span class="badge badge-done">Borrow</span></td>
+            <td>Surface as prioritised alert card with inactivity duration visible</td>
+          </tr>
+          <tr>
+            <td>Opportunity summary instead of raw data fields</td>
+            <td>Einstein, HubSpot</td>
+            <td><span class="badge badge-done">Borrow</span></td>
+            <td>Every insight card has a 1–2 sentence AI-written plain-language summary</td>
+          </tr>
+          <tr>
+            <td>Proactive insights pushed to user (vs. user digging)</td>
+            <td>Agentforce, Gong Deal Boards</td>
+            <td><span class="badge badge-done">Borrow</span></td>
+            <td>Panel is ambient — insights appear without user querying</td>
+          </tr>
+          <tr>
+            <td>Conversational AI query ("Which deals are at risk?")</td>
+            <td>Einstein Copilot, HubSpot Breeze</td>
+            <td><span class="badge badge-done">Borrow</span></td>
+            <td>AI Assistant as the on-demand layer below the proactive Insight Panel</td>
+          </tr>
+          <tr>
+            <td>Feature complexity and overwhelming UI</td>
+            <td>All three</td>
+            <td><span class="badge badge-wip">Fix</span></td>
+            <td>Default view must be scannable in &lt;10 seconds. Progressive disclosure only</td>
+          </tr>
+          <tr>
+            <td>Best features paywalled at enterprise tier</td>
+            <td>Salesforce, HubSpot</td>
+            <td><span class="badge badge-wip">Fix</span></td>
+            <td>Core AI insight panel available to all Sales Manager users — not an add-on</td>
+          </tr>
+          <tr>
+            <td>AI insight delay (20–30 min for Gong)</td>
+            <td>Gong</td>
+            <td><span class="badge badge-wip">Fix</span></td>
+            <td>Insights refresh on session load; show last-updated timestamp for trust</td>
+          </tr>
+          <tr>
+            <td>No explanation of why AI suggested something</td>
+            <td>All three (partial)</td>
+            <td><span class="badge badge-wip">Fix</span></td>
+            <td>Every insight shows its data source ("based on 90 days, 42 deals") — explainability by default</td>
+          </tr>
+          <tr>
+            <td>Lock-in to single platform ecosystem</td>
+            <td>Salesforce, HubSpot</td>
+            <td><span class="badge badge-wip">Fix</span></td>
+            <td>DataFlow's panel works with its own native data — no external dependency required</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="card" style="border-left: 3px solid var(--accent-2);">
+        <div class="card-title">The gap DataFlow can own</div>
+        <p>Every major competitor has AI features. None of them have solved <strong>simplicity at the manager level</strong>. Salesforce is too enterprise-heavy. HubSpot is too feature-cluttered. Gong is too focused on call data and too slow. The whitespace is a <strong>fast, trustworthy, proactive insight panel</strong> that a Sales Manager can actually use in 90 seconds every morning — without a dedicated admin, without a 3-month rollout, and without digging through 11 dashboards.</p>
+      </div>
+
+      <!-- SOURCES -->
+      <div class="sources-block">
+        <div class="sources-title">Sources</div>
+        <ol class="sources-list">
+          <li id="csrc-1"><a href="https://www.eesel.ai/blog/salesforce-einstein-ai-reviews" target="_blank" rel="noopener">eesel.ai — "Salesforce Einstein AI reviews 2025: Is it worth it?"</a> · eesel.ai</li>
+          <li id="csrc-2"><a href="https://www.dench.com/blog/salesforce-einstein-review" target="_blank" rel="noopener">Dench Blog — "Salesforce Einstein Review: AI That's Worth the Price?"</a> · dench.com</li>
+          <li id="csrc-3"><a href="https://bluetris.com/salesforce-einstein-2025-ai-features" target="_blank" rel="noopener">Bluetris — "Salesforce Einstein 2025: Top AI Features & Innovations"</a> · bluetris.com</li>
+          <li id="csrc-4"><a href="https://www.oliv.ai/blog/salesforce-einstein-features" target="_blank" rel="noopener">Oliv.ai — "Salesforce Einstein Features: What Works, What Doesn't"</a> · oliv.ai</li>
+          <li id="csrc-5"><a href="https://aismartventures.com/posts/microsoft-copilot-vs-hubspot-ai-which-is-better-for-your-business/" target="_blank" rel="noopener">AI Smart Ventures — "Microsoft Copilot vs HubSpot AI: Which Is Better?"</a> · aismartventures.com</li>
+          <li id="csrc-6"><a href="https://www.eesel.ai/blog/is-hubspot-service-hub-ai-worth-it" target="_blank" rel="noopener">eesel.ai — "Is HubSpot Service Hub AI worth it? An honest 2026 review"</a> · eesel.ai</li>
+          <li id="csrc-7"><a href="https://www.myengineeringbuddy.com/blog/hubspot-reviews-alternatives-pricing-offerings/" target="_blank" rel="noopener">MEB — "HubSpot Reviews, Alternatives, Pricing & Offerings 2025"</a> · myengineeringbuddy.com</li>
+          <li id="csrc-8"><a href="https://skywork.ai/skypage/en/Gong-Login-2025-Review-An-In-Depth-Look-at-the-Revenue-AI-Leader/1974365346439294976" target="_blank" rel="noopener">Skywork.ai — "Gong 2025 Review: An In-Depth Look at the Revenue AI Leader"</a> · skywork.ai</li>
+          <li id="csrc-9"><a href="https://venturebeat.com/ai/gong-study-sales-teams-using-ai-generate-77-more-revenue-per-rep" target="_blank" rel="noopener">VentureBeat — "Gong study: Sales teams using AI generate 77% more revenue per rep"</a> · venturebeat.com</li>
+          <li id="csrc-10"><a href="https://www.oliv.ai/blog/gong-reviews" target="_blank" rel="noopener">Oliv.ai — "We Analyzed 600+ Gong Reviews"</a> · oliv.ai</li>
+          <li id="csrc-11"><a href="https://proshort.ai/resources/blog/8-best-revenue-intelligence-platforms-with-reviews-2025" target="_blank" rel="noopener">Proshort — "8 Best Revenue Intelligence Platforms with Reviews [2025]"</a> · proshort.ai</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- STEP 05: IDEATION & PARADIGM EXPLORATION -->
+    <section id="ideation" class="section">
+      <div class="section-header">
+        <div>
+          <div class="section-num">Step 05 <span class="badge badge-done">Done</span></div>
+          <h2>Ideation & Paradigm Exploration</h2>
+          <p>Divergent thinking — exploring 4 interaction models to bridge the gap between raw data and sales execution.</p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="display: block; margin-top: 1.5rem;">
+        
+        <!-- CONCEPT 1 (SELECTED - NOW LISTED FIRST) -->
+        <div class="card" style="margin-bottom: 1.5rem; border-left: 3px solid var(--accent); background: var(--tag-bg);">
+          <div class="card-title" style="color: var(--accent); font-weight: 600;">Concept 1: Proactive Briefing + Inline Micro-Insights + Global Agent (SELECTED)</div>
+          <p style="font-size: 0.85rem; color: var(--ink-soft); line-height: 1.6; margin-top: 0.5rem;">
+            A unified, multi-layered architecture: (1) A hero "Morning Briefing" panel with 3 key actionable risk/opportunity cards at the top; (2) Expandable micro-insight chips embedded directly above every traditional chart; (3) A global conversational AI agent available on-demand via a side drawer.
+          </p>
+          <div style="margin-top: 0.75rem; font-size: 0.83rem; line-height: 1.5;">
+            <p><strong style="color: var(--ok);">Pros:</strong> Resolves "data overload" progressively. The manager gets a 90-second top-level overview instantly, can validate it inline via specific charts, and can escalate complex queries to the agent without sacrificing screen space.</p>
+            <p><strong style="color: var(--ok);">Design Verdict:</strong> Perfect balance of proactive guidance, deep validation, and user control. Safely maintains the "Human-in-the-loop" pattern.</p>
+          </div>
+        </div>
+
+        <!-- CONCEPT 2 (PREVIOUSLY CONCEPT 1) -->
+        <div class="card" style="margin-bottom: 1.5rem; border-left: 3px solid var(--ink-faint);">
+          <div class="card-title" style="color: var(--ink);">Concept 2: The Persistent Side Panel & Chat Hybrid</div>
+          <p style="font-size: 0.85rem; color: var(--ink-soft); line-height: 1.6; margin-top: 0.5rem;">
+            A permanent sidebar occupying 25% of the screen. The top half displays static, real-time data interpretations (Salesforce widget pattern), while the bottom half contains an always-on conversational chatbot.
+          </p>
+          <div style="margin-top: 0.75rem; font-size: 0.83rem; line-height: 1.5;">
+            <p><strong style="color: var(--ok);">Pros:</strong> High contextual awareness. Data interpretations are always visible without active user effort, and the chat is immediately accessible for follow-up queries.</p>
+            <p><strong style="color: var(--warn);">Cons:</strong> Severe screen real estate reduction. Restricting the main table/chart views to 75% width worsens the visual density and compromises core CRM scannability.</p>
+          </div>
+        </div>
+
+        <!-- CONCEPT 3 -->
+        <div class="card" style="margin-bottom: 1.5rem; border-left: 3px solid var(--warn);">
+          <div class="card-title" style="color: var(--ink);">Concept 3: The Standalone AI Insights Dashboard</div>
+          <p style="font-size: 0.85rem; color: var(--ink-soft); line-height: 1.6; margin-top: 0.5rem;">
+            Moving all AI capabilities to a completely separate, dedicated tab or dashboard page within the application navigation menu.
+          </p>
+          <div style="margin-top: 0.75rem; font-size: 0.83rem; line-height: 1.5;">
+            <p><strong style="color: var(--ok);">Pros:</strong> Cleanest implementation from an engineering perspective. Gives AI unlimited space to display complex breakdowns and historical trend correlations.</p>
+            <p><strong style="color: var(--warn);">Cons:</strong> High friction and context fragmentation (the "16th tab" problem). Forcing the manager to switch tabs to see insights breaks the seamless flow of daily operations, leading to rapid drop-offs in adoption.</p>
+          </div>
+        </div>
+
+        <!-- CONCEPT 4 -->
+        <div class="card" style="margin-bottom: 1.5rem; border-left: 3px solid var(--ink-faint);">
+          <div class="card-title" style="color: var(--ink);">Concept 4: Pure Chatbot Interface (Chat-Only)</div>
+          <p style="font-size: 0.85rem; color: var(--ink-soft); line-height: 1.6; margin-top: 0.5rem;">
+            No proactive dashboard widgets or text summaries. The entire feature is reduced to an overlay floating action button that opens a blank conversational LLM prompt.
+          </p>
+          <div style="margin-top: 0.75rem; font-size: 0.83rem; line-height: 1.5;">
+            <p><strong style="color: var(--ok);">Pros:</strong> Minimalist UI footprints. Zero interference with the existing design language and core layout of the DataFlow application.</p>
+            <p><strong style="color: var(--warn);">Cons:</strong> Massive cognitive friction. Places the burden entirely on the user (requires prompt engineering skills). Managers under "data overload" do not know what questions to ask a blank interface on Monday morning.</p>
+          </div>
+        </div>
+
+      </div>
+  </main>
+
+</div>
+</body>
+</html>
