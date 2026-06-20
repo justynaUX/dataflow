@@ -1908,11 +1908,11 @@
     .comp-screenshot:last-child { border-right: none; }
     .comp-screenshot img {
       width: 100%;
-      height: 180px;
-      object-fit: cover;
-      object-position: top left;
+      max-height: 400px;
+      object-fit: contain;
       display: block;
       transition: opacity 0.15s;
+      background: var(--surface);
     }
     .comp-screenshot:hover img { opacity: 0.85; }
     .comp-screenshot-label {
@@ -2114,6 +2114,7 @@
                 </ul>
               </div>
             </div>
+          </div>
 
           <div class="comp-screenshots">
             <div class="comp-screenshot" data-full="salesforce1.png" data-caption="Salesforce Einstein — Next Best Action panel">
@@ -2126,7 +2127,6 @@
               <div class="comp-screenshot-label">Data Insights</div>
               <div class="comp-zoom-hint">↗ Expand</div>
             </div>
-          </div>
           </div>
         </div>
 
