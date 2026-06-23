@@ -2102,10 +2102,34 @@
           </div>
         </div>
 
+        <!-- ENTRY 5B -->
+        <div class="log-entry">
+          <div class="log-meta">
+            <div class="log-step">Step 04B</div>
+            <div class="log-phase">Ideation & Paradigm Exploration</div>
+            <div class="log-tool tool-claude">Gemini</div>
+          </div>
+          <div class="log-body">
+            <div class="log-section">
+              <div class="log-section-label">What I prompted</div>
+              <p>Introduced a critical ideation phase to explore diverse interaction paradigms before jumping into UI. Directed AI to evaluate four distinct user experiences: persistent side panel, proactive layered briefing workspace, standalone insights tab, and pure minimalist chatbot conversation shell.</p>
+            </div>
+            <div class="log-section">
+              <div class="log-section-label">What AI produced</div>
+              <p>Four concept outlines with trade-off analysis across dimensions: discoverability, context-switching cost, adoption friction, and fit with the Sales Manager mental model.</p>
+            </div>
+            <div class="log-section">
+              <div class="log-section-label">What I kept / changed</div>
+              <p>Selected <strong>Concept 1 (Proactive Layered Architecture)</strong> as the winning direction. Rejected the pure chat layout due to high user prompt friction — Marcin shouldn't need to ask a question to get value. Declined the separate tab concept due to context fragmentation. These decisions were mine, not AI's recommendation.</p>
+            </div>
+            <div class="log-verdict log-verdict-edited">✎ Used with edits</div>
+          </div>
+        </div>
+
         <!-- ENTRY 6 -->
         <div class="log-entry">
           <div class="log-meta">
-            <div class="log-step">Step 05</div>
+            <div class="log-step">Step 05A</div>
             <div class="log-phase">Scope Decision & User Flows</div>
             <div class="log-tool tool-claude">Claude</div>
           </div>
@@ -2129,7 +2153,7 @@
         <!-- ENTRY 7 -->
         <div class="log-entry">
           <div class="log-meta">
-            <div class="log-step">Step 05b</div>
+            <div class="log-step">Step 05B</div>
             <div class="log-phase">Edge Cases</div>
             <div class="log-tool tool-claude">Claude</div>
           </div>
@@ -2150,8 +2174,8 @@
           </div>
         </div>
 
-        <!-- ENTRY 8 - PENDING -->
-        <div class="log-entry log-entry-pending">
+        <!-- ENTRY 8 -->
+        <div class="log-entry">
           <div class="log-meta">
             <div class="log-step">Step 06</div>
             <div class="log-phase">Information Architecture</div>
@@ -2159,26 +2183,90 @@
           </div>
           <div class="log-body">
             <div class="log-section">
-              <div class="log-section-label">Status</div>
-              <p>Not yet completed — will be documented after IA step is finished.</p>
+              <div class="log-section-label">What I prompted</div>
+              <p>Asked Claude to translate the JTBD framework into a concrete information architecture — defining zones, hierarchy, component inventory, and cross-layer interactions. Requested that the IA reflect the 90-second success scenario from the persona.</p>
             </div>
-            <div class="log-verdict log-verdict-pending">⏳ Pending</div>
+            <div class="log-section">
+              <div class="log-section-label">What AI produced</div>
+              <p>Two-zone structure (Zone A: proactive AI alerts, Zone B: supporting analytics), component inventory with states, and a cross-layer interaction pattern — clicking an alert card highlights the corresponding row in Zone B. Also surfaced 4 edge cases including low-confidence AI state and stale data scenario.</p>
+            </div>
+            <div class="log-section">
+              <div class="log-section-label">What I kept / changed</div>
+              <p>Kept the two-zone split — it maps cleanly onto J1 (triage) and J2 (early warning). Rejected the initial Zone B layout which placed charts before the table — reordered to prioritise Regional Pipeline Velocity as the primary supporting widget because it has the most direct link to Zone A alerts. The cross-layer "AI flagged" connection between alert cards and the table was my idea — Claude formalised it into the IA document.</p>
+            </div>
+            <div class="log-verdict log-verdict-edited">✎ Used with edits</div>
           </div>
         </div>
 
-        <!-- ENTRY 9 - PENDING -->
-        <div class="log-entry log-entry-pending">
+        <!-- ENTRY 9 -->
+        <div class="log-entry">
           <div class="log-meta">
             <div class="log-step">Step 07</div>
-            <div class="log-phase">Design Screens</div>
+            <div class="log-phase">Design Screens — AI Briefing</div>
+            <div class="log-tool tool-claude">Claude + V0</div>
+          </div>
+          <div class="log-body">
+            <div class="log-section">
+              <div class="log-section-label">What I prompted</div>
+              <p>Used Claude as a Lead Designer reviewer throughout the iterative UI process — submitting screenshots after each v0 iteration and asking for specific, actionable critique tied to persona goals and IA decisions. Prompts for v0 were co-written: I defined the design intent, Claude translated it into precise technical specifications referencing existing component names and Tailwind classes.</p>
+            </div>
+            <div class="log-section">
+              <div class="log-section-label">What AI produced</div>
+              <p>Per-iteration critique identifying specific problems (hierarchy, contrast, CTA ambiguity, semantic colour misuse), ranked by priority. V0 prompts targeting individual components rather than full rebuilds. Renamed CTAs from feature names ("Deploy Competitive Matrix") to action consequences ("Open Playbook"). Proposed "Why flagged?" as more precise than "Details" — signals AI reasoning, not just additional content.</p>
+            </div>
+            <div class="log-section">
+              <div class="log-section-label">What I kept / changed</div>
+              <p>Accepted the horizontal card layout recommendation after seeing a wireframe mockup — this was a significant architecture change I hadn't initially considered. Rejected the confidence score pill with violet background — too visually dominant for secondary information. Kept confidence as a neutral pill. The decision to rename "AI Interpretation" to "AI Insights" was mine — shorter and consistent with the toggle label. The decision to place AI Insights above chart data rather than below was Claude's — accepted after understanding the cognitive framing argument.</p>
+            </div>
+            <div class="log-verdict log-verdict-edited">✎ Used with edits</div>
+          </div>
+        </div>
+
+        <!-- ENTRY 9B -->
+        <div class="log-entry">
+          <div class="log-meta">
+            <div class="log-step">Step 07B</div>
+            <div class="log-phase">Design Screens — Dashboard</div>
+            <div class="log-tool tool-claude">Claude + V0</div>
+          </div>
+          <div class="log-body">
+            <div class="log-section">
+              <div class="log-section-label">What I prompted</div>
+              <p>After completing AI Briefing, asked Claude to define what Screen 2 should contain and why — specifically what data widgets would serve J2 (Early Warning) without duplicating AI Briefing content. Then co-wrote v0 prompts for each iteration.</p>
+            </div>
+            <div class="log-section">
+              <div class="log-section-label">What AI produced</div>
+              <p>Recommendation to use Dashboard as a J2 vehicle with an AI Insights layer added on top of existing CRM widgets — rather than designing new widgets from scratch. Proposed the Team Activity Heatmap as the most differentiated addition (not standard in CRM dashboards, high signal for a Sales Manager). Identified WCAG contrast failures in the initial heatmap colour palette. Proposed the AI Insights toggle as a global control for all AI elements simultaneously.</p>
+            </div>
+            <div class="log-section">
+              <div class="log-section-label">What I kept / changed</div>
+              <p>Accepted the scope reframe — Dashboard is not a new product, it is an existing CRM screen with AI intelligence layered on top. This reframe changed what I documented in the design rationale. Rejected violet background for AI Insights sections after seeing it rendered — too much visual noise on a data-heavy screen. Stayed with white background and border-l as the separator. The decision to show numbers inside heatmap cells (not colour alone) was mine after Claude flagged the WCAG issue — Claude identified the problem, I chose the solution.</p>
+            </div>
+            <div class="log-verdict log-verdict-edited">✎ Used with edits</div>
+          </div>
+        </div>
+
+        <!-- ENTRY 9C -->
+        <div class="log-entry">
+          <div class="log-meta">
+            <div class="log-step">Step 07C</div>
+            <div class="log-phase">Design System</div>
             <div class="log-tool tool-claude">Claude</div>
           </div>
           <div class="log-body">
             <div class="log-section">
-              <div class="log-section-label">Status</div>
-              <p>Not yet completed — will document AI use in copywriting, placeholder data generation, and component decisions.</p>
+              <div class="log-section-label">What I prompted</div>
+              <p>Asked Claude to extract and document the implicit design system that emerged across both screens — tokens, component variants, AI-specific patterns, and consistency rules.</p>
             </div>
-            <div class="log-verdict log-verdict-pending">⏳ Pending</div>
+            <div class="log-section">
+              <div class="log-section-label">What AI produced</div>
+              <p>Token inventory: achromatic palette with single AI accent --ai: #7c3aed, component states for alert cards (default / expanded / dismissed), AI visual language rules (violet = AI-generated content, red = data values only, Sparkles = single AI symbol throughout), and the confidence score pattern with tooltip explaining data basis on hover.</p>
+            </div>
+            <div class="log-section">
+              <div class="log-section-label">What I kept / changed</div>
+              <p>The "violet = AI, red = data values only" rule was made explicit by Claude after I noticed inconsistency in early iterations where red text was used for both "AI flagged" labels and negative trend percentages. Once named as a rule I applied it consistently across both screens. The Sparkles icon as the single AI symbol was Claude's suggestion — I had initially used different icons in different contexts. Accepted it immediately as it simplified the visual language.</p>
+            </div>
+            <div class="log-verdict log-verdict-edited">✎ Used with edits</div>
           </div>
         </div>
 
@@ -2194,30 +2282,6 @@
         </p>
       </div>
 
-    
-        <!-- ENTRY FOR STEP 05 IDEATION -->
-        <div class="log-entry">
-          <div class="log-meta">
-            <div class="log-step">Step 05</div>
-            <div class="log-phase">Ideation & Paradigm Exploration</div>
-            <div class="log-tool tool-claude">Gemini</div>
-          </div>
-          <div class="log-body">
-            <div class="log-section">
-              <div class="log-section-label">What I prompted</div>
-              <p>Introduced a critical ideation phase to explore diverse interaction paradigms before jumping into UI. Directed AI to evaluate four distinct user experiences: persistent side panel, proactive layered briefing workspace, standalone insights tab, and pure minimalist chatbot conversation shell.</p>
-            </div>
-            <div class="log-section">
-              <div class="log-section-label">What AI produced</div>
-              <p>Four concept outlines with trade-off analysis across dimensions: discoverability, context-switching cost, adoption friction, and fit with the Sales Manager mental model.</p>
-            </div>
-            <div class="log-section">
-              <div class="log-section-label">What I kept / changed</div>
-              <p>Selected <strong>Concept 1 (Proactive Layered Architecture)</strong> as the winning direction. Rejected the pure chat layout due to high user prompt friction — Marcin shouldn't need to ask a question to get value. Declined the separate tab concept due to context fragmentation. These decisions were mine, not AI's recommendation.</p>
-            </div>
-            <div class="log-verdict log-verdict-edited">✎ Used with edits</div>
-          </div>
-        </div>
 </section>
   </main>
 
