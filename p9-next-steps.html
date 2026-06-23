@@ -364,7 +364,7 @@
       </div>
 
       <p style="font-family:var(--font-display);font-size:17px;line-height:1.65;margin-bottom:24px;">
-        This project addresses two distinct Jobs to Be Done. Success is defined not by engagement alone, but by measurable improvement in outcomes for the Sales Manager and their team.
+        This project addresses three Jobs to Be Done across two screens. Success is defined not by engagement alone, but by measurable improvement in outcomes for the Sales Manager and their team.
       </p>
 
       <div class="card" style="border-left:2px solid var(--ink);background:var(--tag-bg);margin-bottom:24px;">
@@ -411,7 +411,7 @@
         </tbody>
       </table>
 
-      <h3 class="subsection-title">J2 — Early Warning: "I know about the problem before it becomes a crisis"</h3>
+      <h3 class="subsection-title">J4 — Decision Support: "I know where to focus my team's energy"</h3>
 
       <table class="data-table" style="margin-bottom:32px;">
         <thead>
@@ -424,28 +424,73 @@
         </thead>
         <tbody>
           <tr>
-            <td><strong>Alert-to-action time</strong></td>
+            <td><strong>Dashboard visit frequency</strong></td>
             <td>Behavioral</td>
-            <td>Time between alert display and Marcin's first response</td>
-            <td>&lt;24h for high-priority alerts</td>
+            <td>% of working days Marcin opens Dashboard</td>
+            <td>&gt;3x per week within first 30 days</td>
+          </tr>
+          <tr>
+            <td><strong>AI Insights engagement rate</strong></td>
+            <td>Behavioral</td>
+            <td>% of Dashboard sessions where Marcin hovers an AI Insights section (tooltip triggered)</td>
+            <td>&gt;50% of sessions — low rate signals AI Insights are being ignored</td>
+          </tr>
+          <tr>
+            <td><strong>AI Insights toggle OFF rate</strong></td>
+            <td>Behavioral</td>
+            <td>% of sessions where toggle is turned OFF</td>
+            <td>&lt;15% — high rate signals AI layer is perceived as noise, not signal</td>
+          </tr>
+          <tr>
+            <td><strong>Flagged rep intervention rate</strong></td>
+            <td>Behavioral</td>
+            <td>% of AI-flagged reps who receive a 1:1 or coaching action logged within 48h</td>
+            <td>&gt;70% — measures whether heatmap flagging drives real management action</td>
+          </tr>
+          <tr>
+            <td><strong>Resource allocation accuracy</strong></td>
+            <td>Outcome</td>
+            <td>Manager's time spent on regions/reps that AI flagged vs. non-flagged — tracked via calendar and CRM activity logs</td>
+            <td>Positive correlation between AI flags and manager attention within 1 quarter</td>
+          </tr>
+          <tr>
+            <td><strong>Team quota attainment</strong></td>
+            <td>Outcome</td>
+            <td>% of monthly/quarterly target achieved by the team</td>
+            <td>+8% after 2 full quarters</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="subsection-title">J3 — Explainability on demand: "Inline pattern — measured indirectly"</h3>
+
+      <p style="font-family:var(--font-display);font-size:16px;line-height:1.65;margin-bottom:16px;">
+        J3 is not a separate screen — it is an inline pattern available on both screens through the Why flagged? accordion, confidence score tooltips, and the AI chat sidebar. It is measured indirectly through trust proxies rather than direct engagement.
+      </p>
+
+      <table class="data-table" style="margin-bottom:32px;">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Layer</th>
+            <th>Target</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Why flagged? open rate</strong></td>
+            <td>Behavioral</td>
+            <td>&gt;40% of alert cards opened at least once — low rate may signal users trust (or distrust) AI without verifying</td>
           </tr>
           <tr>
             <td><strong>False positive rate</strong></td>
             <td>Behavioral</td>
-            <td>% of alerts dismissed by the user as irrelevant</td>
-            <td>&lt;20% (higher rate signals poor AI signal quality)</td>
+            <td>&lt;20% dismiss rate — higher signals AI reasoning is not convincing</td>
           </tr>
           <tr>
-            <td><strong>Problem detection lag</strong></td>
-            <td>Outcome</td>
-            <td>How many days earlier problems are identified vs. previous quarter</td>
-            <td>−5 days on average</td>
-          </tr>
-          <tr>
-            <td><strong>Quota attainment</strong></td>
-            <td>Outcome</td>
-            <td>% of monthly/quarterly target achieved by the team</td>
-            <td>+10% after 2 full quarters</td>
+            <td><strong>Confidence tooltip engagement</strong></td>
+            <td>Behavioral</td>
+            <td>Tracked as proxy for trust-building — users who check data basis are more likely to act on AI recommendations</td>
           </tr>
         </tbody>
       </table>
@@ -457,22 +502,22 @@
       </p>
 
       <p style="font-family:var(--font-display);font-size:16px;line-height:1.65;margin-bottom:16px;">
-        Outcome metrics, however, require at least one full sales quarter to produce meaningful data. Quota attainment, deal loss rates, and problem detection lag are influenced by many variables beyond the product — measuring them too early risks drawing false conclusions.
+        Outcome metrics require at least one full sales quarter to produce meaningful data. Quota attainment, resource allocation accuracy, and team performance are influenced by many variables beyond the product — measuring them too early risks drawing false conclusions.
       </p>
 
       <div class="card-title" style="margin-top:24px;margin-bottom:12px;">Recommended measurement schedule</div>
       <ul style="list-style:none;padding:0;margin-bottom:32px;">
         <li style="font-family:var(--font-display);font-size:16px;line-height:1.65;padding:8px 0;border-bottom:1px solid var(--rule-light);padding-left:16px;position:relative;">
           <span style="position:absolute;left:0;opacity:.35;">—</span>
-          <strong>Week 1–4 post-launch:</strong> behavioral metrics only — monitor adoption, alert engagement, and early drop-off signals
+          <strong>Week 1–4 post-launch:</strong> behavioral metrics only — monitor adoption, AI Insights engagement, toggle OFF rate, and early drop-off signals
         </li>
         <li style="font-family:var(--font-display);font-size:16px;line-height:1.65;padding:8px 0;border-bottom:1px solid var(--rule-light);padding-left:16px;position:relative;">
           <span style="position:absolute;left:0;opacity:.35;">—</span>
-          <strong>After Quarter 1:</strong> first outcome metric review — evaluate detection lag and deal follow-up rate
+          <strong>After Quarter 1:</strong> first outcome metric review — evaluate flagged rep intervention rate, resource allocation correlation, and alert click-through trends
         </li>
         <li style="font-family:var(--font-display);font-size:16px;line-height:1.65;padding:8px 0;padding-left:16px;position:relative;">
           <span style="position:absolute;left:0;opacity:.35;">—</span>
-          <strong>After Quarter 2:</strong> full success evaluation — quota attainment and longitudinal behavioral trends
+          <strong>After Quarter 2:</strong> full success evaluation — quota attainment, longitudinal behavioral trends, and AI trust indicators (false positive rate, confidence tooltip engagement)
         </li>
       </ul>
     </section>
