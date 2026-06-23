@@ -1973,167 +1973,167 @@
         <div>
           <div class="section-num">Step 07 <span class="badge badge-done">Done</span></div>
           <h2>Information Architecture</h2>
-          <p>Dual-layer workspace model — how the screen is split, what each zone contains, how components are structured</p>
+          <p>Two-screen model — how screens are structured, what each contains, and how AI integrates at every layer</p>
         </div>
       </div>
 
-      <!-- FRAMING -->
-      <p style="font-family:var(--font-display);font-size:17px;line-height:1.65;margin-bottom:32px;max-width:640px;">The IA is built on a <strong>Dual-Layer Workspace</strong> model. The screen splits into two independent but integrated zones: a Proactive Layer that surfaces AI-driven signals, and a Reactive Layer for traditional analytics. Marcin never has to wade through raw numbers unless he chooses to dig into a specific alert.</p>
+      <!-- BLOCK 1 — OVERVIEW -->
+      <h3 class="subsection-title">Two-screen model</h3>
+      <p style="font-family:var(--font-display);font-size:16px;line-height:1.7;color:var(--ink-soft);max-width:680px;margin-bottom:8px;">The IA is built around two distinct screens, each serving a different cognitive mode. AI Briefing serves J1 and J2 — action-oriented triage that Marcin completes in under 90 seconds. Dashboard serves J4 — analytical review of pipeline and team performance with AI interpretation layered on top of existing data widgets. J3 (Explainability) is not a separate screen — it is an inline pattern available on both screens through confidence score tooltips, the Why flagged? accordion, and the persistent AI chat sidebar.</p>
 
-      <!-- 1. APP SHELL -->
-      <div class="section-num" style="margin-bottom:6px;">1 — Global Screen Layout</div>
-      <h3 style="font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:16px;">The App Shell</h3>
-      <div class="hr-heavy" style="margin-bottom:24px;"></div>
-
-      <div class="grid-2" style="margin-bottom:36px;">
-        <div>
-          <div class="card-title" style="margin-bottom:8px;">Left Navigation Sidebar</div>
-          <p style="font-family:var(--font-display);font-size:15px;line-height:1.65;color:var(--ink-soft);">Minimalist, space-saving panel using a <strong>Hover-to-Expand</strong> pattern. Icons only by default — expands to show text labels (Dashboard, Accounts, Pipeline, Reports, Settings) on hover.</p>
+      <!-- BLOCK 2 — GLOBAL SHELL -->
+      <h3 class="subsection-title" style="margin-top:2.5rem;">Global shell — persistent across both screens</h3>
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div style="padding:16px 0;border-bottom:1px solid var(--rule-light);">
+          <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">Left navigation sidebar</div>
+          <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Collapsible sidebar with toggle at the bottom. Expanded by default — collapses to icons-only on toggle. Active state: bg #F1F5F9, text #0F172A. Default state: no background, text #64748B. AI Briefing appears first — signals that AI is the core feature, not an add-on. Dashboard second.</p>
         </div>
-        <div>
-          <div class="card-title" style="margin-bottom:8px;">Top Navigation Bar</div>
-          <p style="font-family:var(--font-display);font-size:15px;line-height:1.65;color:var(--ink-soft);">Global search, user profile, system freshness timestamp (<em>Data synced 4m ago</em>), and a permanent high-contrast action button on the far right: <strong>Ask DataFlow AI</strong>.</p>
+        <div style="padding:16px 0;border-bottom:1px solid var(--rule-light);">
+          <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">Top navigation bar</div>
+          <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">DataFlow logo (always visible, does not collapse with sidebar). Global search. Data synced timestamp — persistent trust signal, turns amber if data is stale. Notification bell.</p>
         </div>
-      </div>
-
-      <!-- 2. WORKSPACE ZONES -->
-      <div class="section-num" style="margin-bottom:6px;">2 — Workspace Segmentation</div>
-      <h3 style="font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:16px;">Main Canvas</h3>
-      <div class="hr-heavy" style="margin-bottom:24px;"></div>
-
-      <!-- Zone A -->
-      <div style="border:1px solid var(--ink);margin-bottom:-1px;">
-        <div style="background:var(--ink);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px;">
-          <span style="font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;opacity:0.55;">Zone A</span>
-          <span style="font-family:var(--font-display);font-size:17px;font-weight:400;">The Proactive AI Layer</span>
-          <span style="font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.45;margin-left:auto;">Top 30% of screen</span>
-        </div>
-        <div style="padding:20px 24px;">
-          <p style="font-family:var(--font-body);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.45;margin-bottom:14px;">Objective — immediate situational awareness on login</p>
-          <div style="display:flex;flex-direction:column;gap:0;">
-            <div style="padding:12px 0;border-bottom:1px solid var(--rule-light);display:flex;gap:16px;">
-              <span style="font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.4;flex-shrink:0;width:140px;padding-top:3px;">Morning Briefing</span>
-              <p style="font-family:var(--font-display);font-size:15px;line-height:1.6;color:var(--ink-soft);">Dynamic greeting paired with a 2-sentence prose summary of current pipeline risks — human-readable, not a dashboard dump.</p>
-            </div>
-            <div style="padding:12px 0;display:flex;gap:16px;">
-              <span style="font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.4;flex-shrink:0;width:140px;padding-top:3px;">AI Suggestion Grid</span>
-              <p style="font-family:var(--font-display);font-size:15px;line-height:1.6;color:var(--ink-soft);">Three contextual insight cards ranked by financial urgency: Critical Risk → Pipeline Anomaly → Upsell Opportunity.</p>
-            </div>
-          </div>
+        <div style="padding:16px 0;">
+          <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">Floating AI entry point</div>
+          <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Fixed bottom-right button: "Ask DataFlow AI". Fill #0F172A, text and icon #F7FAFC. Opens persistent right sidebar chat panel — push layout, does not overlap content. Available on both screens at all times.</p>
         </div>
       </div>
 
-      <!-- Zone B -->
-      <div style="border:1px solid var(--rule);margin-bottom:36px;">
-        <div style="background:var(--tag-bg);color:var(--ink);padding:14px 24px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--rule);">
-          <span style="font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;opacity:0.55;">Zone B</span>
-          <span style="font-family:var(--font-display);font-size:17px;font-weight:400;">The Reactive Analytical Layer</span>
-          <span style="font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.45;margin-left:auto;">Bottom 70% of screen</span>
+      <!-- BLOCK 3 — SCREEN 1: AI BRIEFING -->
+      <h3 class="subsection-title" style="margin-top:2.5rem;">Screen 1 — AI Briefing</h3>
+
+      <div class="ia-zone-card ia-zc-alerts" style="margin-bottom:36px;">
+        <div class="ia-zc-header">
+          <span class="ia-zc-title">AI Briefing</span>
+          <span class="ia-zc-tag">J1 Morning Triage · J2 Early Warning</span>
         </div>
-        <div style="padding:20px 24px;">
-          <p style="font-family:var(--font-body);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.45;margin-bottom:14px;">Objective — deep-dive validation and traditional workflow execution</p>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--rule-light);">
-            <div style="padding:16px 20px;border-right:1px solid var(--rule-light);">
-              <div style="font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.45;margin-bottom:8px;">Left Column</div>
-              <div style="font-family:var(--font-body);font-size:12px;font-weight:600;margin-bottom:4px;">Data Visualisation</div>
-              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Interactive bar chart — Quarterly Revenue Forecast — with a floating micro-AI interpretation badge.</p>
+        <div class="ia-zc-body">
+          <p class="ia-zc-desc">Default landing screen. Designed for completion in under 90 seconds. Contains no charts or tables — those belong to Dashboard. This is an action list, not an analytics view.</p>
+
+          <div style="display:flex;flex-direction:column;gap:0;margin-top:4px;">
+            <div style="padding:14px 0;border-bottom:1px solid var(--rule-light);">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">Morning Briefing header</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">AI-generated 2-sentence summary of the most important signal of the day. Border-left violet — signals AI-generated content. Appears above alert cards as framing context before Marcin reads individual alerts.</p>
             </div>
-            <div style="padding:16px 20px;">
-              <div style="font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.45;margin-bottom:8px;">Right Column</div>
-              <div style="font-family:var(--font-body);font-size:12px;font-weight:600;margin-bottom:4px;">Data Management</div>
-              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">High-density table — Regional Pipeline Velocity — listing active reps, deal stages, and raw CRM inputs.</p>
+            <div style="padding:14px 0;border-bottom:1px solid var(--rule-light);">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">Alert cards — horizontal rows</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Maximum 3 cards, ranked by financial urgency: Critical Risk → Pipeline Anomaly → Upsell Opportunity. Full-width horizontal rows stacked vertically — priority communicated by position, top = most urgent. Each card contains: category badge + semantic colour border-left · title · description · confidence score pill · primary CTA · Dismiss · Why flagged? trigger.</p>
+            </div>
+            <div style="padding:14px 0;border-bottom:1px solid var(--rule-light);">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">Confidence score pill</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Displayed top-right of each card. Neutral pill styling — border #E2E8F0, text #64748B. Hover reveals tooltip explaining exact data signals used: e.g. "12 days no email activity · 0 calls logged · 80% historical ghosting probability."</p>
+            </div>
+            <div style="padding:14px 0;border-bottom:1px solid var(--rule-light);">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">Why flagged? accordion</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Collapsed by default. Opens on click to reveal two supporting data widgets inline below the card. One accordion open at a time. Trigger text: "Why flagged? ↓" when closed, "Hide data ↑" when open. Background: bg-background-secondary. Supporting data header: Sparkles icon + "SUPPORTING DATA · [ENTITY NAME]" in #64748B.</p>
+            </div>
+            <div style="padding:14px 0;border-bottom:1px solid var(--rule-light);">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">Supporting data widgets</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Two widgets per card, shown only when accordion is open. Content is contextual per alert type: ACME Corp → Deal Activity Log + Stage vs. Benchmark · Region West → Regional Pipeline Velocity + Activity Trend · Delta Ltd → Usage Trend + Account Snapshot. No borders on widget containers.</p>
+            </div>
+            <div style="padding:14px 0;border-bottom:1px solid var(--rule-light);">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">AI chat entry point</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Bottom of page: "Ask DataFlow AI for deeper analysis →". Sparkles icon + arrow in #0F172A. Hover: text color #0F172A. Opens chat sidebar.</p>
+            </div>
+            <div style="padding:14px 0;">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">AI chat sidebar</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Right sidebar, 360px wide, full viewport height. Push layout — main content shifts left, not overlapped. Header: Sparkles #0F172A + "DataFlow AI" title + X close. Empty state: Sparkles icon #64748B centered + "Ask me anything about your pipeline" + 3 suggestion chips: "Why is Region West down?" · "Summarize today's risks" · "Draft follow-up for ACME". Input bar: full width, submit button fill #0F172A.</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 3. CARD ANATOMY -->
-      <div class="section-num" style="margin-bottom:6px;">3 — Component Hierarchy</div>
-      <h3 style="font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:16px;">5-Layer Insight Card Anatomy</h3>
-      <div class="hr-heavy" style="margin-bottom:8px;"></div>
-      <p style="font-family:var(--font-display);font-size:15px;line-height:1.65;color:var(--ink-soft);margin-bottom:20px;">Every card in Zone A strictly implements this hierarchy — from raw signal to executable action.</p>
+      <!-- BLOCK 4 — SCREEN 2: DASHBOARD -->
+      <h3 class="subsection-title" style="margin-top:2.5rem;">Screen 2 — Dashboard</h3>
 
-      <div style="border:1px solid var(--ink);margin-bottom:36px;">
-        <div style="padding:14px 24px 0;display:flex;gap:0;border-bottom:1px solid var(--rule);">
-          <span style="font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.4;padding-bottom:14px;width:40px;flex-shrink:0;">Layer</span>
-          <span style="font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.4;padding-bottom:14px;flex:1;padding-left:16px;">Name</span>
-          <span style="font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.4;padding-bottom:14px;flex:2;padding-left:16px;">Content / Example</span>
+      <div class="ia-zone-card ia-zc-insights" style="margin-bottom:36px;">
+        <div class="ia-zc-header">
+          <span class="ia-zc-title">Dashboard</span>
+          <span class="ia-zc-tag">J4 Decision Support · J3 Explainability inline</span>
         </div>
+        <div class="ia-zc-body">
+          <p class="ia-zc-desc">Second screen — analytical mode. Marcin arrives here to understand how his pipeline and team are performing. The screen contains existing CRM widgets. The design task was not to redesign these widgets — it was to define how AI intelligence integrates with them.</p>
 
-        <div style="padding:14px 24px;display:flex;gap:0;border-bottom:1px solid var(--rule-light);align-items:baseline;">
-          <span style="font-family:var(--font-display);font-size:20px;font-style:italic;opacity:0.3;width:40px;flex-shrink:0;">1</span>
-          <div style="flex:1;padding-left:16px;">
-            <div style="font-family:var(--font-body);font-size:12px;font-weight:700;margin-bottom:2px;">Metadata &amp; Confidence</div>
-          </div>
-          <div style="flex:2;padding-left:16px;">
-            <p style="font-family:var(--font-display);font-size:14px;line-height:1.55;color:var(--ink-soft);">Priority badge left (<em>CRITICAL RISK</em>), model accuracy right (<em>94% Confidence</em>).</p>
-          </div>
-        </div>
-
-        <div style="padding:14px 24px;display:flex;gap:0;border-bottom:1px solid var(--rule-light);align-items:baseline;">
-          <span style="font-family:var(--font-display);font-size:20px;font-style:italic;opacity:0.3;width:40px;flex-shrink:0;">2</span>
-          <div style="flex:1;padding-left:16px;">
-            <div style="font-family:var(--font-body);font-size:12px;font-weight:700;margin-bottom:2px;">Verdict</div>
-          </div>
-          <div style="flex:2;padding-left:16px;">
-            <p style="font-family:var(--font-display);font-size:14px;line-height:1.55;color:var(--ink-soft);">Bold, concise business headline — <em>"ACME Corp Deal is Stagnant."</em></p>
-          </div>
-        </div>
-
-        <div style="padding:14px 24px;display:flex;gap:0;border-bottom:1px solid var(--rule-light);align-items:baseline;">
-          <span style="font-family:var(--font-display);font-size:20px;font-style:italic;opacity:0.3;width:40px;flex-shrink:0;">3</span>
-          <div style="flex:1;padding-left:16px;">
-            <div style="font-family:var(--font-body);font-size:12px;font-weight:700;margin-bottom:2px;">Evidence Narrative</div>
-          </div>
-          <div style="flex:2;padding-left:16px;">
-            <p style="font-family:var(--font-display);font-size:14px;line-height:1.55;color:var(--ink-soft);">Plain-language explanation of why this was flagged — <em>"No email logged for 12 days. 80% historical probability of buyer ghosting."</em></p>
-          </div>
-        </div>
-
-        <div style="padding:14px 24px;display:flex;gap:0;border-bottom:1px solid var(--rule-light);align-items:baseline;">
-          <span style="font-family:var(--font-display);font-size:20px;font-style:italic;opacity:0.3;width:40px;flex-shrink:0;">4</span>
-          <div style="flex:1;padding-left:16px;">
-            <div style="font-family:var(--font-body);font-size:12px;font-weight:700;margin-bottom:2px;">Recommendation</div>
-          </div>
-          <div style="flex:2;padding-left:16px;">
-            <p style="font-family:var(--font-display);font-size:14px;line-height:1.55;color:var(--ink-soft);">Visually distinct callout with the optimal next step — <em>"Generate a tailored executive re-engagement email via Copilot."</em></p>
-          </div>
-        </div>
-
-        <div style="padding:14px 24px;display:flex;gap:0;align-items:baseline;">
-          <span style="font-family:var(--font-display);font-size:20px;font-style:italic;opacity:0.3;width:40px;flex-shrink:0;">5</span>
-          <div style="flex:1;padding-left:16px;">
-            <div style="font-family:var(--font-body);font-size:12px;font-weight:700;margin-bottom:2px;">Macro Action Footer</div>
-          </div>
-          <div style="flex:2;padding-left:16px;">
-            <p style="font-family:var(--font-display);font-size:14px;line-height:1.55;color:var(--ink-soft);">Primary execution button + micro-feedback loop (thumbs up/down and <em>Adjust Context</em> link to train the model).</p>
+          <div style="display:flex;flex-direction:column;gap:0;margin-top:4px;">
+            <div style="padding:14px 0;border-bottom:1px solid var(--rule-light);">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">AI Insights toggle</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Top-right of page header. Sparkles icon #64748B + "AI insights" label + green toggle switch. ON by default. When toggled OFF: all AI Insights sections, confidence scores, and AI flagged badges disappear simultaneously. Raw data remains unchanged. Toggle state persists across sessions.</p>
+            </div>
+            <div style="padding:14px 0;border-bottom:1px solid var(--rule-light);">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">KPI tiles — row of 3</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Pipeline vs. Quota · Win Rate · Forecast Accuracy. Each tile has an AI Insights section at the bottom, separated by border-t border-border/40. Always visible — no interaction required. Structure: Sparkles icon + "AI Insights" label + confidence score inline · body text 1-2 sentences · hover on section reveals tooltip with data basis.</p>
+            </div>
+            <div style="padding:14px 0;border-bottom:1px solid var(--rule-light);">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">AI Insights section — all widgets</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Consistent pattern across all data widgets on Dashboard. Position: below card title and subtitle, above the data visualisation. Always visible. Sparkles icon #64748B · "AI Insights" label #64748B · confidence score as neutral pill · body text #64748B. No background color, no border on the section container. Hover on section → tooltip showing data basis.</p>
+            </div>
+            <div style="padding:14px 0;border-bottom:1px solid var(--rule-light);">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">Quarterly Revenue Forecast chart</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Existing CRM widget. AI Insights appears above the chart — Marcin reads interpretation before data, not after. Recharts BarChart, two series: Actual (dark) and Forecast (dashed/lighter). X-axis: month labels.</p>
+            </div>
+            <div style="padding:14px 0;border-bottom:1px solid var(--rule-light);">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">Regional Pipeline Velocity table</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Existing CRM widget. AI Insights above table. Region West row: bg-destructive/5, "AI flagged" badge styled identically to confidence pills — white background, border #E2E8F0, text #64748B, sentence case. Cross-screen signal: same problem Marcin saw in AI Briefing morning alert.</p>
+            </div>
+            <div style="padding:14px 0;">
+              <div style="font-family:'DM Sans', sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;">Team Activity heatmap</div>
+              <p style="font-family:var(--font-display);font-size:14px;line-height:1.6;color:var(--ink-soft);">Full-width card. AI Insights above heatmap. Grid: 8 reps × 4 weeks. Each cell shows numeric activity count + background color tier: 20+ High (emerald-200) · 10-19 Med (amber-200) · 5-9 Low (orange-200) · 0-4 Critical (red-300). AI-flagged reps: red arrow + name in destructive color + Sparkles icon #0F172A inline. Hover on Sparkles: tooltip "Flagged by AI — critical activity drop detected."</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 4. INTERACTION FLOWS -->
-      <div class="section-num" style="margin-bottom:6px;">4 — Cross-Layer Interactions</div>
-      <h3 style="font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:16px;">Data Mapping &amp; Flows</h3>
-      <div class="hr-heavy" style="margin-bottom:24px;"></div>
+      <!-- BLOCK 5 — AI VISUAL LANGUAGE -->
+      <h3 class="subsection-title" style="margin-top:2.5rem;">AI visual language — consistent across both screens</h3>
+      <p style="font-family:var(--font-display);font-size:15px;line-height:1.65;color:var(--ink-soft);margin-bottom:18px;max-width:680px;">Every AI-generated element uses a single set of visual rules. This allows Marcin to learn once how to identify AI content — then apply that recognition everywhere.</p>
 
-      <div style="display:flex;flex-direction:column;gap:0;margin-bottom:8px;">
+      <table class="data-table" style="margin-bottom:36px;">
+        <thead>
+          <tr><th>Element</th><th>Token</th><th>Usage</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Violet color</strong></td><td>--ai: #7c3aed</td><td>Reserved for: nav active state AI Briefing dot indicator (when unread alerts exist). Not used for content elements — violet was removed from all badges, icons, and labels to avoid overloading the color with multiple meanings.</td></tr>
+          <tr><td><strong>Sparkles icon</strong></td><td>lucide-react Sparkles</td><td>Single icon representing AI throughout the entire system. Used in: nav item · floating button · AI Insights header · flagged rep indicator · chat sidebar header. One icon, one meaning.</td></tr>
+          <tr><td><strong>Neutral pill</strong></td><td>border #E2E8F0 · text #64748B · white bg</td><td>Used for: confidence scores · AI flagged badge. Never colored — avoids collision with semantic colors (red = negative values, green = positive values).</td></tr>
+          <tr><td><strong>Red/amber/green</strong></td><td>semantic data colors</td><td>Reserved exclusively for numeric data values: trend percentages, activity levels, quota gaps. Never used for AI labels or system badges.</td></tr>
+          <tr><td><strong>Primary CTA</strong></td><td>fill #0F172A · text #F7FAFC</td><td>Used for: Draft with AI · Open Playbook · Draft Offer · floating Ask DataFlow AI button · chat submit button. Word "Draft" intentional — signals AI prepares, human decides.</td></tr>
+        </tbody>
+      </table>
 
-        <div style="padding:20px 0;border-bottom:1px solid var(--rule);display:flex;gap:20px;align-items:baseline;">
-          <div style="font-family:var(--font-body);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;flex-shrink:0;width:160px;padding-top:2px;">Zone A → Zone B</div>
-          <div>
-            <div style="font-family:var(--font-body);font-size:13px;font-weight:600;margin-bottom:4px;">Card click → dynamic filtering</div>
-            <p style="font-family:var(--font-display);font-size:15px;line-height:1.65;color:var(--ink-soft);">Clicking an AI card instantly highlights the matching row in the bottom table and drills into the revenue chart. AI guides attention — but always gives immediate access to the source of truth.</p>
-          </div>
+      <!-- BLOCK 6 — COMPONENT STATES -->
+      <h3 class="subsection-title" style="margin-top:2.5rem;">Component states</h3>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Alert card states</div>
+          <ul>
+            <li><strong>Default:</strong> border-l color + content visible, accordion collapsed, Why flagged? visible</li>
+            <li><strong>Accordion open:</strong> supporting data widgets visible below, Hide data ↑ trigger, one open at a time</li>
+            <li><strong>Dismissed:</strong> card removed from view, no replacement until next morning briefing</li>
+          </ul>
         </div>
-
-        <div style="padding:20px 0;border-bottom:1px solid var(--rule);display:flex;gap:20px;align-items:baseline;">
-          <div style="font-family:var(--font-body);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;flex-shrink:0;width:160px;padding-top:2px;">Global trigger</div>
-          <div>
-            <div style="font-family:var(--font-body);font-size:13px;font-weight:600;margin-bottom:4px;">Ask DataFlow AI → conversational drawer</div>
-            <p style="font-family:var(--font-display);font-size:15px;line-height:1.65;color:var(--ink-soft);">The global button slides out a 400px sidebar drawer from the right edge, anchoring a persistent chat assistant on top of the current workspace — no context lost, no page navigation.</p>
-          </div>
+        <div class="card">
+          <div class="card-title">AI chat sidebar states</div>
+          <ul>
+            <li><strong>Closed:</strong> floating button visible bottom-right</li>
+            <li><strong>Open:</strong> sidebar 360px from right, content pushed left, button shows X icon</li>
+            <li><strong>Empty state:</strong> Sparkles centered + placeholder + 3 suggestion chips</li>
+            <li><strong>Active conversation:</strong> message thread, input bar at bottom</li>
+          </ul>
         </div>
-
+        <div class="card">
+          <div class="card-title">AI Insights toggle states</div>
+          <ul>
+            <li><strong>ON (default):</strong> all AI elements visible across Dashboard</li>
+            <li><strong>OFF:</strong> AI Insights sections hidden, confidence scores hidden, AI flagged badges hidden, raw data widgets unchanged</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Confidence score tooltip states</div>
+          <ul>
+            <li><strong>Default:</strong> neutral pill, no interaction indicator</li>
+            <li><strong>Hover:</strong> tooltip appears with data basis explanation, max-w-xs, shadcn Tooltip component</li>
+          </ul>
+        </div>
       </div>
 
     </section>
